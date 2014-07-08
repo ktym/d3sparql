@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<title>d3sparql.js</title>
+<script src="lib/jquery/jquery.min.js"></script>
+<script src="lib/bootstrap/js/bootstrap.min.js"/></script>
+<link href="lib/bootstrap/css/bootstrap.css" rel="stylesheet">
+<script>
+function loadframe(html) {
+  $("#iframe").attr("src", html)
+}
+</script>
+
+<div class="navbar navbar-fixed-top navbar-inverse">
+  <div class="navbar-inner" style="padding-left: 20px">
+    <a class="brand" href="javascript:loadframe('d3sparql.html')"><i class="icon-th"></i> D3SPARQL</a>
+    <ul class="nav">
+      <li class="divider-vertical"></li>
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tree<b class="caret"></b></a>
+        <ul class="dropdown-menu">
+          <li><a href="javascript:loadframe('d3sparql-roundtree.html')"><i class="icon-th-large"></i> d3roundtree</a></li>
+          <li><a href="javascript:loadframe('d3sparql-dendrogram.html')"><i class="icon-th-large"></i> d3dendrogram</a></li>
+          <li><a href="javascript:loadframe('d3sparql-treemap.html')"><i class="icon-th-large"></i> d3treemap</a></li>
+          <li><a href="javascript:loadframe('d3sparql-sunburst.html')"><i class="icon-th-large"></i> d3sunburst</a></li>
+          <li><a href="javascript:loadframe('d3sparql-circlepack.html')"><i class="icon-th-large"></i> d3circlepack</a></li>
+        </ul>
+      </li>
+      <li class="divider-vertical"></li>
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Graph<b class="caret"></b></a>
+        <ul class="dropdown-menu">
+          <li><a href="javascript:loadframe('d3sparql-forcegraph.html')"><i class="icon-th-large"></i> d3forcegraph</a></li>
+        </ul>
+      </li>
+      <li class="divider-vertical"></li>
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Plot<b class="caret"></b></a>
+        <ul class="dropdown-menu">
+          <li><a href="javascript:loadframe('d3sparql-scatterplot.html')"><i class="icon-th-large"></i> d3scatterplot</a></li>
+        </ul>
+      </li>
+      <li class="divider-vertical"></li>
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Table<b class="caret"></b></a>
+        <ul class="dropdown-menu">
+          <li><a href="javascript:loadframe('d3sparql-htmltable.html')"><i class="icon-th-large"></i> d3htmltable</a></li>
+          <li><a href="javascript:loadframe('d3sparql-htmlhash.html')"><i class="icon-th-large"></i> d3htmlhash</a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="container" style="padding: 50px">
+<iframe id="iframe" src="d3sparql.html" width="100%" height="1000" scrolling="auto" frameborder="0" seamless></iframe>
+</div>

@@ -16,19 +16,19 @@
     }
     function render(json) {
       console.log(json)
-      var opts = {
-        "x_label": "genome size (bp) -- circle size corresponds to # of histidine kinase domains",
-        "y_label": "# of genes",
-        "x_var": "length",
-        "y_var": "genes",
-        "r_var": "hks",
-        "r_min": 1,
-        "r_max": 20,
+      var config = {
+        "label_x": "genome size (bp) -- circle size corresponds to # of histidine kinase domains",
+        "label_y": "# of genes",
+        "var_x": "length",
+        "var_y": "genes",
+        "var_r": "hks",
+        "min_r": 1,
+        "max_r": 20,
         "width": 850,
         "height": 300,
         "margin": 60,
       }
-      d3scatterplot(json, opts)
+      d3scatterplot(json, config)
       d3htmltable(json)
     }
 

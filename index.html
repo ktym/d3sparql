@@ -7,6 +7,10 @@
 <script>
 function loadframe(html) {
   $("#iframe").attr("src", html)
+    //.load(function() {
+    //  $(this).css("height", $(this).contents().height() + 100 + "px")
+    //})
+  $(window).scrollTop(0)
 }
 </script>
 
@@ -52,5 +56,5 @@ function loadframe(html) {
 </div>
 
 <div class="container" style="padding: 50px">
-<iframe id="iframe" src="d3sparql.html" width="100%" height="1000" scrolling="auto" frameborder="0" seamless></iframe>
+<iframe id="iframe" src="d3sparql.html" width="100%" height="30000" scrolling="no" frameborder="0" seamless></iframe>
 </div>

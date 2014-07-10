@@ -15,21 +15,20 @@
       d3.json("data/taxonomy/58669.json", render)
     }
     function render(json) {
-      var opts1 = {
+      var config = {
+        // for sparql2graph()
         "key1": "taxid1",
         "key2": "taxid2",
         "label1": "name1",
         "label2": "name2",
-      }
-      var opts2 = {
+        // for d3forcegraph()
         "radius": function(d) {return 1 + d.label.length},
         "charge": -500,
         "distance": 50,
         "width": 1000,
         "height": 750,
       }
-      var graph = sparql2graph(json, opts1)
-      d3forcegraph(graph, opts2)
+      d3forcegraph(json, config)
     }
 
     function toggle() {

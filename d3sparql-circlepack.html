@@ -15,19 +15,17 @@
       d3.json("data/taxonomy/tardigrada.json", render)
     }
     function render(json) {
-      console.log(json)
-      var opts1 = {
+      var config = {
+        // for sparql2tree()
         "root": "Tardigrada",
         "parent": "parent_name",
         "child": "child_name",
-      }
-      var opts2 = {
+        // for d3circlepack()
         "width": 800,
         "height": 800,
         "diameter": 700,
       }
-      var tree = sparql2tree(json, opts1)
-      d3circlepack(tree, opts2)
+      d3circlepack(json, config)
     }
 
     function toggle() {

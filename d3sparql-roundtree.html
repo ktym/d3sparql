@@ -15,19 +15,18 @@
       d3.json("data/taxonomy/tardigrada.json", render)
     }
     function render(json) {
-      var opts1 = {
+      var config = {
+        // for sparql2tree()
         "root": "Hypsibiidae",
         "parent": "parent_name",
         "child": "child_name",
-      }
-      var opts2 = {
+        // for d3roundtree()
         "diameter": 800,
         "angle": 360,
         "depth": 200,
         "radius": 5,
       }
-      var tree = sparql2tree(json, opts1)
-      d3roundtree(tree, opts2)
+      d3roundtree(json, config)
     }
 
     function toggle() {

@@ -4,7 +4,7 @@
 //   Web site: http://github.com/ktym/d3sparql/
 //   Copyright: 2013, 2014 (C) Toshiaki Katayama (ktym@dbcls.jp)
 //   Initial version: 2013-01-28
-//   Last updated: 2014-07-09
+//   Last updated: 2014-07-11
 //
 
 /*
@@ -19,7 +19,7 @@
       <script src="d3sparql.js"></script>
       <script>
        function exec() {
-         var endpoint = "http://beta.sparql.uniprot.org/sparql"
+         var endpoint = d3.select("#endpoint").property("value")
          var query = d3.select("#sparql").property("value")
          sparql(endpoint, query, render)
        }
@@ -31,6 +31,7 @@
       </script>
      </head>
      <body onload="exec()">
+      <input id="endpoint" value="http://dbpedia.org/sparql" type="text" style="display:none">
       <textarea id="sparql" style="display:none">
         PREFIX ...
         SELECT ...
@@ -46,9 +47,107 @@ function sparql(endpoint, sparql_string, callback) {
   console.log(query)
   d3.xhr(query, mime, function(request) {
     var json = request.responseText
-console.log(json)
+    console.log(json)
     callback(JSON.parse(json))
   })
+}
+
+/*
+  Convert sparql-results+json object into a JSON graph in the {"nodes": [], "links": []} form.
+  Suitable for d3.layout.force(), d3.layout.sankey() etc.
+
+  Options:
+    config = {
+      "key1": "SPARQL variable name for node1",
+      "key2": "SPARQL variable name for node2",
+      "label1": "SPARQL variable name for the label of node1",  // optional
+      "label2": "SPARQL variable name for the label of node2",  // optional
+    }
+
+  Synopsis:
+    sparql(endpoint, query, render)
+
+    function render(json) {
+      var config = { ... }
+      d3forcegraph(json, config)
+    }
+*/
+function sparql2graph(json, config) {
+  var data = json.results.bindings
+  var graph = {
+    "nodes": [],
+    "links": []
+  }
+  var check = d3.map()
+  var index = 0
+  for (var i = 0; i < data.length; i++) {
+    var key1 = data[i][config.key1].value
+    var key2 = data[i][config.key2].value
+    var label1 = config.label1 ? data[i][config.label1].value : key1
+    var label2 = config.label2 ? data[i][config.label2].value : key2
+    if (!check.has(key1)) {
+      graph.nodes.push({"key": key1, "label": label1})
+      check.set(key1, index)
+      index++
+    }
+    if (!check.has(key2)) {
+      graph.nodes.push({"key": key2, "label": label2})
+      check.set(key2, index)
+      index++
+    }
+    graph.links.push({"source": check.get(key1), "target": check.get(key2)})
+  }
+  return graph
+}
+
+/*
+  Convert sparql-results+json object into a JSON graph in the {"name": name, "size": size, "children": []} form.
+  Suitable for d3.layout.hierarchy() family cluster (dendrogram), pack (circlepack), partition (sunburst), tree (roundtree), treemap (treemap)
+
+  Options:
+    config = {
+      "root": "value for root node",
+      "parent": "SPARQL variable name for parent node",
+      "child": "SPARQL variable name for child node",
+    }
+
+  Synopsis:
+    sparql(endpoint, query, render)
+    function render(json) {
+      var config = { ... }
+      d3roundtree(json, config)
+      d3dendrogram(json, config)
+      d3sunburst(json, config)
+      d3treemap(json, config)
+    }
+*/
+function sparql2tree(json, config) {
+  var data = json.results.bindings
+  var tree = d3.map()
+  var parent = child = children = true
+  for (var i = 0; i < data.length; i++) {
+    parent = data[i][config.parent].value
+    child = data[i][config.child].value
+    if (tree.has(parent)) {
+      children = tree.get(parent)
+      children.push(child)
+      tree.set(parent, children)
+    } else {
+      children = [child]
+      tree.set(parent, children)
+    }
+  }
+  function traverse(node) {
+    var list = tree.get(node)
+    if (list) {
+      var children = list.map(function(d) {return traverse(d)})
+      var subtotal = d3.sum(children, function(d) {return d.size})
+      return {"name": node, "children": children, "size": subtotal}
+    } else {
+      return {"name": node, "size": 1}
+    }
+  }
+  return traverse(config.root)
 }
 
 /*
@@ -192,52 +291,6 @@ function d3scatterplot(json, config) {
 //  .attr("transform", "rotate(-90, -" + config.margin + "0, 0) translate(-" + label_offset_y * 2 + ")");
 }
 
-/*
-  Convert sparql-results+json object into a JSON graph of the {"nodes": [], "links": []} form
-
-  Options:
-    config = {
-      "key1": "SPARQL variable name for node1",
-      "key2": "SPARQL variable name for node2",
-      "label1": "SPARQL variable name for the label of node1",  // optional
-      "label2": "SPARQL variable name for the label of node2",  // optional
-    }
-
-  Synopsis:
-    sparql(endpoint, query, render)
-
-    function render(json) {
-      var graph = sparql2graph(json, config)
-      d3forcegraph(graph, options)
-    }
-*/
-function sparql2graph(json, config) {
-  var data = json.results.bindings
-  var graph = {
-    "nodes": [],
-    "links": []
-  }
-  var check = d3.map()
-  var index = 0
-  for (var i = 0; i < data.length; i++) {
-    var key1 = data[i][config.key1].value
-    var key2 = data[i][config.key2].value
-    var label1 = config.label1 ? data[i][config.label1].value : key1
-    var label2 = config.label2 ? data[i][config.label2].value : key2
-    if (!check.has(key1)) {
-      graph.nodes.push({"key": key1, "label": label1})
-      check.set(key1, index)
-      index++
-    }
-    if (!check.has(key2)) {
-      graph.nodes.push({"key": key2, "label": label2})
-      check.set(key2, index)
-      index++
-    }
-    graph.links.push({"source": check.get(key1), "target": check.get(key2)})
-  }
-  return graph
-}
 
 /*
   Force graph layout
@@ -255,8 +308,8 @@ function sparql2graph(json, config) {
   Synopsis:
     sparql(endpoint, query, render)
     function render(json) {
-      var graph = sparql2graph(json, options)
-      d3forcegraph(graph, config)
+      var config = { ... }
+      d3forcegraph(json, config)
     }
 
   TODO:
@@ -264,17 +317,18 @@ function sparql2graph(json, config) {
     Try other d3.layout.force options.
 */
 function d3forcegraph(json, config) {
+  var graph = sparql2graph(json, config)
   var svg = d3.select("body")
     .append("svg")
     .attr("width", config.width)
     .attr("height", config.height)
   var link = svg.selectAll(".link")
-    .data(json.links)
+    .data(graph.links)
     .enter()
     .append("line")
     .attr("class", "link")
   var node = svg.selectAll(".node")
-    .data(json.nodes)
+    .data(graph.nodes)
     .enter()
     .append("g")
   var circle = node.append("circle")
@@ -287,8 +341,8 @@ function d3forcegraph(json, config) {
     .charge(config.charge)
     .linkDistance(config.distance)
     .size([config.width, config.height])
-    .nodes(json.nodes)
-    .links(json.links)
+    .nodes(graph.nodes)
+    .links(graph.links)
     .start()
   force.on("tick", function() {
     link.attr("x1", function(d) {return d.source.x})
@@ -304,55 +358,6 @@ function d3forcegraph(json, config) {
 }
 
 /*
-  Convert sparql-results+json object into a JSON graph of the {"name": name, "size": size, "children": []} form
-
-  Options:
-    config = {
-      "root": "value for root node",
-      "parent": "SPARQL variable name for parent node",
-      "child": "SPARQL variable name for child node",
-    }
-
-  Synopsis:
-    sparql(endpoint, query, render)
-    function render(json) {
-      var tree = sparql2tree(json, config)
-      d3roundtree(tree, options)
-      d3dendrogram(tree, options)
-      d3sunburst(tree, options)
-      d3treemap(tree, options)
-    }
-*/
-function sparql2tree(json, config) {
-  var data = json.results.bindings
-  var tree = d3.map()
-  var parent = child = children = true
-  for (var i = 0; i < data.length; i++) {
-    parent = data[i][config.parent].value
-    child = data[i][config.child].value
-    if (tree.has(parent)) {
-      children = tree.get(parent)
-      children.push(child)
-      tree.set(parent, children)
-    } else {
-      children = [child]
-      tree.set(parent, children)
-    }
-  }
-  function traverse(node) {
-    var list = tree.get(node)
-    if (list) {
-      var children = list.map(function(d) {return traverse(d)})
-      var subtotal = d3.sum(children, function(d) {return d.size})
-      return {"name": node, "children": children, "size": subtotal}
-    } else {
-      return {"name": node, "size": 1}
-    }
-  }
-  return traverse(config.root)
-}
-
-/*
   http://bl.ocks.org/4063550  Reingold-Tilford Tree
 
   Options:
@@ -364,10 +369,14 @@ function sparql2tree(json, config) {
     }
 
   Synopsis:
-    var tree = sparql2tree(json, options)
-    d3roundtree(tree, config)
+    sparql(endpoint, query, render)
+    function render(json) {
+      var config = { ... }
+      d3roundtree(json, config)
+    }
 */
-function d3roundtree(tree, config) {
+function d3roundtree(json, config) {
+  var tree = sparql2tree(json, config)
   var tree_layout = d3.layout.tree()
     .size([config.angle, config.depth])
     .separation(function(a, b) {return (a.parent == b.parent ? 1 : 2) / a.depth})
@@ -416,10 +425,14 @@ function d3roundtree(tree, config) {
     }
 
   Synopsis:
-    var tree = sparql2tree(json, options)
-    d3dendrogram(tree, config)
+    sparql(endpoint, query, render)
+    function render(json) {
+      var config = { ... }
+      d3dendrogram(json, config)
+    }
 */
-function d3dendrogram(tree, config) {
+function d3dendrogram(json, config) {
+  var tree = sparql2tree(json, config)
   var cluster = d3.layout.cluster()
     .size([config.height, config.width - config.margin])
   var diagonal = d3.svg.diagonal()
@@ -464,10 +477,14 @@ function d3dendrogram(tree, config) {
     }
 
   Synopsis:
-    var tree = sparql2tree(json, options)
-    d3sunburst(tree, config)
- */
-function d3sunburst(tree, config) {
+    sparql(endpoint, query, render)
+    function render(json) {
+      var config = { ... }
+      d3sunburst(json, config)
+    }
+*/
+function d3sunburst(json, config) {
+  var tree = sparql2tree(json, config)
   var radius = Math.min(config.width, config.height) / 2 - config.margin
   var x = d3.scale.linear().range([0, 2 * Math.PI])
   var y = d3.scale.sqrt().range([0, radius])
@@ -565,13 +582,17 @@ function d3sunburst(tree, config) {
     }
 
   Synopsis:
-    var tree = sparql2tree(json, options)
-    d3circlepack(tree, config)
+    sparql(endpoint, query, render)
+    function render(json) {
+      var config = { ... }
+      d3circlepack(json, config)
+    }
 
   TODO:
     Fix rotation angle for each text to avoid string collision
 */
-function d3circlepack(tree, config) {
+function d3circlepack(json, config) {
+  var tree = sparql2tree(json, config)
   var w = config.width,
       h = config.height,
       r = config.diameter,
@@ -649,10 +670,14 @@ function d3circlepack(tree, config) {
     }
 
   Synopsis:
-    var tree = sparql2tree(json, options)
-    d3sunburst(tree, config)
+    sparql(endpoint, query, render)
+    function render(json) {
+      var config = { ... }
+      d3treemap(json, config)
+    }
 */
-function d3treemap(tree, config) {
+function d3treemap(json, config) {
+  var tree = sparql2tree(json, config)
   var width  = config.width - config.margin * 2
   var height = config.height - config.margin * 2
   var color = d3.scale.category20c()
@@ -683,7 +708,8 @@ function d3treemap(tree, config) {
 }
 
 /* TODO */
-function d3treemapzoom(tree, config) {
+function d3treemapzoom(json, config) {
+  var tree = sparql2tree(json, config)
   var margin = {top: 20, right: 0, bottom: 0, left: 0},
     width = 960,
     height = 500 - margin.top - margin.bottom,

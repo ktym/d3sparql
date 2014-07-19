@@ -4,8 +4,23 @@
 //   Web site: http://github.com/ktym/d3sparql/
 //   Copyright: 2013, 2014 (C) Toshiaki Katayama (ktym@dbcls.jp)
 //   Initial version: 2013-01-28
-//   Last updated: 2014-07-19
 //
+
+var d3sparql = {
+  version: "d3sparql.js version 2014-07-19"
+}
+
+d3sparql.toggle = function() {
+  var button = d3.select("#button")
+  var elem = d3.select("#sparql")
+  if (elem.style("display") == "none") {
+    elem.style("display", "inline")
+    button.attr("class", "icon-chevron-up")
+  } else {
+    elem.style("display", "none")
+    button.attr("class", "icon-chevron-down")
+  }
+}
 
 /*
   Execute a SPARQL query and pass the result to a given callback function
@@ -45,19 +60,19 @@
      </body>
     </html>
 */
-function sparql(endpoint, sparql_string, callback) {
-  var query = endpoint + "?query=" + encodeURIComponent(sparql_string)
+d3sparql.query = function(endpoint, sparql, callback) {
+  var url = endpoint + "?query=" + encodeURIComponent(sparql)
   console.log(endpoint)
-  console.log(query)
+  console.log(url)
 /*
   var mime = "application/sparql-results+json"
-  d3.xhr(query, mime, function(request) {
+  d3.xhr(url, mime, function(request) {
     var json = request.responseText
     console.log(json)
     callback(JSON.parse(json))
   })
 */
-  d3.json(query, function(error, json) {
+  d3.json(url, function(error, json) {
     console.log(error)
     console.log(json)
     callback(json)
@@ -85,9 +100,9 @@ function sparql(endpoint, sparql_string, callback) {
     }
 
   TODO:
-    Should node hold value?
+    Should nodes hold value (in what key name)?
 */
-function sparql2graph(json, config) {
+d3sparql.graph = function(json, config) {
   var data = json.results.bindings
   var graph = {
     "nodes": [],
@@ -136,7 +151,7 @@ function sparql2graph(json, config) {
       d3treemap(json, config)
     }
 */
-function sparql2tree(json, config) {
+d3sparql.tree = function(json, config) {
   var data = json.results.bindings
   var tree = d3.map()
   var parent = child = children = true
@@ -188,7 +203,7 @@ function sparql2tree(json, config) {
     }
     </style>
 */
-function d3htmltable(json) {
+d3sparql.htmltable = function(json) {
   var head = json.head.vars
   var data = json.results.bindings
   var table = d3.select("body").append("table").attr("class", "table table-bordered")
@@ -247,7 +262,7 @@ function d3htmltable(json) {
     }
     </style>
 */
-function d3htmlhash(json) {
+d3sparql.htmlhash = function(json) {
   var head = json.head.vars
   var data = json.results.bindings[0]
   var table = d3.select("body").append("table").attr("class", "table table-bordered")
@@ -323,7 +338,7 @@ function d3htmlhash(json) {
     }
     </style>
 */
-function d3barchart(json, config) {
+d3sparql.barchart = function(json, config) {
   var head = json.head.vars
   var data = json.results.bindings
 
@@ -444,7 +459,7 @@ function d3barchart(json, config) {
     }
     </style>
 */
-function d3scatterplot(json, config) {
+d3sparql.scatterplot = function(json, config) {
   var head = json.head.vars
   var data = json.results.bindings
   var extent_x = d3.extent(data, function(d) {return parseInt(d[config.var_x].value)})
@@ -558,8 +573,8 @@ function d3scatterplot(json, config) {
   TODO:
     Try other d3.layout.force options.
 */
-function d3forcegraph(json, config) {
-  var graph = sparql2graph(json, config)
+d3sparql.forcegraph = function(json, config) {
+  var graph = d3sparql.graph(json, config)
   var svg = d3.select("body")
     .append("svg")
     .attr("width", config.width)
@@ -654,8 +669,8 @@ function d3forcegraph(json, config) {
     }
     </style>
 */
-function d3roundtree(json, config) {
-  var tree = sparql2tree(json, config)
+d3sparql.roundtree = function(json, config) {
+  var tree = d3sparql.tree(json, config)
   var tree_layout = d3.layout.tree()
     .size([config.angle, config.depth])
     .separation(function(a, b) {return (a.parent == b.parent ? 1 : 2) / a.depth})
@@ -750,8 +765,8 @@ function d3roundtree(json, config) {
     }
     </style>
 */
-function d3dendrogram(json, config) {
-  var tree = sparql2tree(json, config)
+d3sparql.dendrogram = function(json, config) {
+  var tree = d3sparql.tree(json, config)
   var cluster = d3.layout.cluster()
     .size([config.height, config.width - config.margin])
   var diagonal = d3.svg.diagonal()
@@ -835,8 +850,8 @@ function d3dendrogram(json, config) {
     }
     </style>
 */
-function d3sunburst(json, config) {
-  var tree = sparql2tree(json, config)
+d3sparql.sunburst = function(json, config) {
+  var tree = d3sparql.tree(json, config)
   var radius = Math.min(config.width, config.height) / 2 - config.margin
   var x = d3.scale.linear().range([0, 2 * Math.PI])
   var y = d3.scale.sqrt().range([0, radius])
@@ -983,8 +998,8 @@ function d3sunburst(json, config) {
   TODO:
     Fix rotation angle for each text to avoid string collision
 */
-function d3circlepack(json, config) {
-  var tree = sparql2tree(json, config)
+d3sparql.circlepack = function(json, config) {
+  var tree = d3sparql.tree(json, config)
   var w = config.width,
       h = config.height,
       r = config.diameter,
@@ -1093,8 +1108,8 @@ function d3circlepack(json, config) {
     }
     </style>
 */
-function d3treemap(json, config) {
-  var tree = sparql2tree(json, config)
+d3sparql.treemap = function(json, config) {
+  var tree = d3sparql.tree(json, config)
   var width  = config.width - config.margin * 2
   var height = config.height - config.margin * 2
   var color = d3.scale.category20c()
@@ -1139,8 +1154,8 @@ function d3treemap(json, config) {
 }
 
 /* TODO */
-function d3treemapzoom(json, config) {
-  var tree = sparql2tree(json, config)
+d3sparql.treemapzoom = function(json, config) {
+  var tree = d3sparql.tree(json, config)
   var margin = {top: 20, right: 0, bottom: 0, left: 0},
     width = 960,
     height = 500 - margin.top - margin.bottom,
@@ -1332,7 +1347,7 @@ function d3treemapzoom(json, config) {
       d3map(json, config = {})
     }
 */
-function d3map(json, config) {
+d3sparql.map = function(json, config) {
   var opts = {
     "width":        config.width || 1000,
     "height":       config.height || 1000,

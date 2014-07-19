@@ -5,12 +5,11 @@
     <link rel="stylesheet" type="text/css" href="lib/bootstrap/css/bootstrap.css"/>
     <script src="lib/d3/d3.v3.min.js"></script>
     <script src="d3sparql.js"></script>
-    <script src="d3sparql-helper.js"></script>
     <script>
     function exec() {
       var endpoint = d3.select("#endpoint").property("value")
-      var query = d3.select("#sparql").property("value")
-      sparql(endpoint, query, render)
+      var sparql = d3.select("#sparql").property("value")
+      d3sparql.query(endpoint, sparql, render)
     }
     function render(json) {
       console.log(json)
@@ -23,11 +22,14 @@
         "height": 300,  // canvas height
         "margin":  80,  // canvas margin
       }
-      d3barchart(json, config)
+      d3sparql.barchart(json, config)
     }
 
     function exec_offline() {
       d3.json("cache/dbpedia/area-ja.json", render)
+    }
+    function toggle() {
+      d3sparql.toggle()
     }
     </script>
     <style>

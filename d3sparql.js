@@ -10,6 +10,7 @@ var d3sparql = {
   version: "d3sparql.js version 2014-07-19"
 }
 
+/* Helper function only for the d3sparql web site */
 d3sparql.toggle = function() {
   var button = d3.select("#button")
   var elem = d3.select("#sparql")
@@ -35,13 +36,13 @@ d3sparql.toggle = function() {
       <script>
        function exec() {
          var endpoint = d3.select("#endpoint").property("value")
-         var query = d3.select("#sparql").property("value")
-         sparql(endpoint, query, render)
+         var sparql = d3.select("#sparql").property("value")
+         d3sparql.query(endpoint, sparql, render)
        }
        function render(json) {
          // set options and call the d3xxxxx function in this library ...
          var config = { ... }
-         d3xxxxx(json, config)
+         d3sparql.xxxxx(json, config)
        }
       </script>
       <style>
@@ -92,11 +93,11 @@ d3sparql.query = function(endpoint, sparql, callback) {
     }
 
   Synopsis:
-    sparql(endpoint, query, render)
+    d3sparql.query(endpoint, sparql, render)
 
     function render(json) {
       var config = { ... }
-      d3forcegraph(json, config)
+      d3sparql.forcegraph(json, config)
     }
 
   TODO:
@@ -142,13 +143,14 @@ d3sparql.graph = function(json, config) {
     }
 
   Synopsis:
-    sparql(endpoint, query, render)
+    d3sparql.sparql(endpoint, sparql, render)
+
     function render(json) {
       var config = { ... }
-      d3roundtree(json, config)
-      d3dendrogram(json, config)
-      d3sunburst(json, config)
-      d3treemap(json, config)
+      d3sparql.roundtree(json, config)
+      d3sparql.dendrogram(json, config)
+      d3sparql.sunburst(json, config)
+      d3sparql.treemap(json, config)
     }
 */
 d3sparql.tree = function(json, config) {
@@ -184,10 +186,10 @@ d3sparql.tree = function(json, config) {
   Rendering sparql-results+json object containing multiple rows into a HTML table
 
   Synopsis:
-    sparql(endpoint, query, render)
+    d3sparql.query(endpoint, sparql, render)
 
     function render(json) {
-      d3htmltable(json)
+      d3sparql.htmltable(json)
     }
 
   CSS:
@@ -243,10 +245,10 @@ d3sparql.htmltable = function(json) {
   Rendering sparql-results+json object containing one row into a HTML table
 
   Synopsis:
-    sparql(endpoint, query, render)
+    d3sparql.query(endpoint, sparql, render)
 
     function render(json) {
-      d3htmlhash(json)
+      d3sparql.htmlhash(json)
     }
 
   CSS:
@@ -309,11 +311,11 @@ d3sparql.htmlhash = function(json) {
     }
 
   Synopsis:
-    sparql(endpoint, query, render)
+    d3sparql.query(endpoint, sparql, render)
 
     function render(json) {
       var config = { ... }
-      d3barchart(json, config)
+      d3sparql.barchart(json, config)
     }
 
   CSS/SVG:
@@ -439,11 +441,11 @@ d3sparql.barchart = function(json, config) {
     }
 
   Synopsis:
-    sparql(endpoint, query, render)
+    d3sparql.query(endpoint, sparql, render)
 
     function render(json) {
       var config = { ... }
-      d3scatterplot(json, config)
+      d3sparql.scatterplot(json, config)
     }
 
   CSS/SVG:
@@ -545,10 +547,11 @@ d3sparql.scatterplot = function(json, config) {
     }
 
   Synopsis:
-    sparql(endpoint, query, render)
+    d3sparql.query(endpoint, sparql, render)
+
     function render(json) {
       var config = { ... }
-      d3forcegraph(json, config)
+      d3sparql.forcegraph(json, config)
     }
 
   CSS/SVG:
@@ -644,10 +647,11 @@ d3sparql.forcegraph = function(json, config) {
     }
 
   Synopsis:
-    sparql(endpoint, query, render)
+    d3sparql.query(endpoint, sparql, render)
+
     function render(json) {
       var config = { ... }
-      d3roundtree(json, config)
+      d3sparql.roundtree(json, config)
     }
 
   CSS/SVG:
@@ -740,10 +744,11 @@ d3sparql.roundtree = function(json, config) {
     }
 
   Synopsis:
-    sparql(endpoint, query, render)
+    d3sparql.query(endpoint, sparql, render)
+
     function render(json) {
       var config = { ... }
-      d3dendrogram(json, config)
+      d3sparql.dendrogram(json, config)
     }
 
   CSS/SVG:
@@ -832,10 +837,11 @@ d3sparql.dendrogram = function(json, config) {
     }
 
   Synopsis:
-    sparql(endpoint, query, render)
+    d3sparql.query(endpoint, sparql, render)
+
     function render(json) {
       var config = { ... }
-      d3sunburst(json, config)
+      d3sparql.sunburst(json, config)
     }
 
   CSS/SVG:
@@ -961,10 +967,11 @@ d3sparql.sunburst = function(json, config) {
     }
 
   Synopsis:
-    sparql(endpoint, query, render)
+    d3sparql.query(endpoint, sparql, render)
+
     function render(json) {
       var config = { ... }
-      d3circlepack(json, config)
+      d3sparql.circlepack(json, config)
     }
 
   CSS/SVG:
@@ -1090,10 +1097,11 @@ d3sparql.circlepack = function(json, config) {
     }
 
   Synopsis:
-    sparql(endpoint, query, render)
+    d3sparql.query(endpoint, sparql, render)
+
     function render(json) {
       var config = { ... }
-      d3treemap(json, config)
+      d3sparql.treemap(json, config)
     }
 
   CSS/SVG:
@@ -1341,10 +1349,10 @@ d3sparql.treemapzoom = function(json, config) {
     }
 
   Synopsis:
-    sparql(endpoint, query, render)
+    d3sparql.query(endpoint, sparql, render)
 
     function render(json) {
-      d3map(json, config = {})
+      d3sparql.map(json, config = {})
     }
 */
 d3sparql.map = function(json, config) {

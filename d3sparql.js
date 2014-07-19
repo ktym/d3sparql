@@ -4,7 +4,7 @@
 //   Web site: http://github.com/ktym/d3sparql/
 //   Copyright: 2013, 2014 (C) Toshiaki Katayama (ktym@dbcls.jp)
 //   Initial version: 2013-01-28
-//   Last updated: 2014-07-11
+//   Last updated: 2014-07-19
 //
 
 /*
@@ -24,31 +24,43 @@
          sparql(endpoint, query, render)
        }
        function render(json) {
-         // set options and call the d3xxxxx functions in this library ...
+         // set options and call the d3xxxxx function in this library ...
          var config = { ... }
          d3xxxxx(json, config)
        }
       </script>
+      <style>
+      <!-- customize CSS -->
+      </style>
      </head>
      <body onload="exec()">
-      <input id="endpoint" value="http://dbpedia.org/sparql" type="text" style="display:none">
-      <textarea id="sparql" style="display:none">
+      <form style="display:none">
+       <input id="endpoint" value="http://dbpedia.org/sparql" type="text">
+       <textarea id="sparql">
         PREFIX ...
         SELECT ...
         WHERE { ... }
-      </textarea>
+       </textarea>
+      </form>
      </body>
     </html>
 */
 function sparql(endpoint, sparql_string, callback) {
   var query = endpoint + "?query=" + encodeURIComponent(sparql_string)
-  var mime = "application/sparql-results+json"
   console.log(endpoint)
   console.log(query)
+/*
+  var mime = "application/sparql-results+json"
   d3.xhr(query, mime, function(request) {
     var json = request.responseText
     console.log(json)
     callback(JSON.parse(json))
+  })
+*/
+  d3.json(query, function(error, json) {
+    console.log(error)
+    console.log(json)
+    callback(json)
   })
 }
 
@@ -71,6 +83,9 @@ function sparql(endpoint, sparql_string, callback) {
       var config = { ... }
       d3forcegraph(json, config)
     }
+
+  TODO:
+    Should node hold value?
 */
 function sparql2graph(json, config) {
   var data = json.results.bindings
@@ -159,11 +174,24 @@ function sparql2tree(json, config) {
     function render(json) {
       d3htmltable(json)
     }
+
+  CSS:
+    <style>
+    table {
+      margin: 10px;
+    }
+    th {
+      background: #eeeeee;
+    }
+    th:first-letter {
+       text-transform: capitalize;
+    }
+    </style>
 */
 function d3htmltable(json) {
   var head = json.head.vars
   var data = json.results.bindings
-  var table = d3.select("body").append("table").attr('class', 'table table-bordered').attr('style', 'margin: 10px')
+  var table = d3.select("body").append("table").attr("class", "table table-bordered")
   var thead = table.append("thead")
   var tbody = table.append("tbody")
   thead.append("tr")
@@ -185,6 +213,15 @@ function d3htmltable(json) {
     .enter()
     .append("td")
     .text(function(val) {return val})
+
+  // default CSS
+  table.style({
+    "margin": "10px"
+  })
+  table.selectAll("th").style({
+    "background": "#eeeeee",
+    "text-transform": "capitalize",
+  })
 }
 
 /*
@@ -196,12 +233,26 @@ function d3htmltable(json) {
     function render(json) {
       d3htmlhash(json)
     }
+
+  CSS:
+    <style>
+    table {
+      margin: 10px;
+    }
+    th {
+      background: #eeeeee;
+    }
+    th:first-letter {
+       text-transform: capitalize;
+    }
+    </style>
 */
 function d3htmlhash(json) {
   var head = json.head.vars
   var data = json.results.bindings[0]
-  var table = d3.select("body").append("table").attr('class', 'table table-bordered').attr('style', 'margin: 10px')
-  var row = table.selectAll("tr")
+  var table = d3.select("body").append("table").attr("class", "table table-bordered")
+  var tbody = table.append("tbody")
+  var row = tbody.selectAll("tr")
     .data(function() {
        return head.map(function(col) {
          return {"head": col, "data": data[col].value}
@@ -213,10 +264,149 @@ function d3htmlhash(json) {
     .text(function(d) {return d.head})
   row.append("td")
     .text(function(d) {return d.data})
+
+  // default CSS
+  table.style({
+    "margin": "10px"
+  })
+  table.selectAll("th").style({
+    "background": "#eeeeee",
+    "text-transform": "capitalize",
+  })
+}
+
+/*
+  Rendering sparql-results+json object into a bar chart
+
+  References:
+    http://bl.ocks.org/mbostock/3885304
+    http://bl.ocks.org/mbostock/4403522
+
+  Options:
+    config = {
+      "label_x": "Prefecture",
+      "label_y": "Area",
+      "var_x": "pref",
+      "var_y": "area",
+      "width":  850,  // canvas width
+      "height": 300,  // canvas height
+      "margin":  40,  // canvas margin
+    }
+
+  Synopsis:
+    sparql(endpoint, query, render)
+
+    function render(json) {
+      var config = { ... }
+      d3barchart(json, config)
+    }
+
+  CSS/SVG:
+    <style>
+    .bar {
+      fill: steelblue;
+    }
+    .bar:hover {
+      fill: brown;
+    }
+    .axis {
+      font: 10px sans-serif;
+    }
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+    .x.axis path {
+      display: none;
+    }
+    </style>
+*/
+function d3barchart(json, config) {
+  var head = json.head.vars
+  var data = json.results.bindings
+
+  var scale_x = d3.scale.ordinal().rangeRoundBands([0, config.width - config.margin], 0.1)
+  var scale_y = d3.scale.linear().range([config.height - config.margin, 0])
+  var axis_x = d3.svg.axis().scale(scale_x).orient("bottom")
+  var axis_y = d3.svg.axis().scale(scale_y).orient("left")  // .ticks(10, "%")
+  scale_x.domain(data.map(function(d) {return d[config.var_x].value}))
+  scale_y.domain(d3.extent(data, function(d) {return parseInt(d[config.var_y].value)}))
+
+  var svg = d3.select("body")
+    .append("svg")
+    .attr("width", config.width)
+    .attr("height", config.height)
+//    .append("g")
+//    .attr("transform", "translate(" + config.margin + "," + 0 + ")")
+
+  var ax = svg.append("g")
+    .attr("class", "axis x")
+    .attr("transform", "translate(" + config.margin + "," + (config.height - config.margin) + ")")
+    .call(axis_x)
+  var ay = svg.append("g")
+    .attr("class", "axis y")
+    .attr("transform", "translate(" + config.margin + ",0)")
+    .call(axis_y)
+  var bar = svg.selectAll(".bar")
+    .data(data)
+    .enter()
+    .append("rect")
+    .attr("transform", "translate(" + config.margin + "," + 0 + ")")
+    .attr("class", "bar")
+    .attr("x", function(d) {return scale_x(d[config.var_x].value)})
+    .attr("width", scale_x.rangeBand())
+    .attr("y", function(d) {return scale_y(d[config.var_y].value)})
+    .attr("height", function(d) {return config.height - scale_y(parseInt(d[config.var_y].value)) - config.margin})
+/*
+    .call(function(e) {
+      e.each(function(d) {
+        console.log(parseInt(d[config.var_y].value))
+      })
+    })
+*/
+  ax.selectAll("text")
+    .attr("dy", ".35em")
+    .attr("x", 10)
+    .attr("y", 0)
+    .attr("transform", "rotate(90)")
+    .style("text-anchor", "start")
+  ax.append("text")
+    .attr("class", "label")
+    .text(config.label_x)
+    .style("text-anchor", "middle")
+    .attr("transform", "translate(" + ((config.width - config.margin) / 2) + "," + (config.margin - 5) + ")")
+  ay.append("text")
+    .attr("class", "label")
+    .text(config.label_y)
+    .style("text-anchor", "middle")
+    .attr("transform", "rotate(-90)")
+    .attr("x", 0 - (config.height / 2))
+    .attr("y", 0 - (config.margin - 20))
+
+  // default CSS/SVG
+  bar.attr({
+    "fill": "steelblue",
+  })
+  svg.selectAll(".axis").attr({
+    "stroke": "black",
+    "fill": "none",
+    "shape-rendering": "crispEdges",
+  })
+  svg.selectAll("text").attr({
+    "stroke": "none",
+    "fill": "black",
+    "font-size": "8pt",
+    "font-family": "sans-serif",
+  })
 }
 
 /*
   Rendering sparql-results+json object into a scatter plot
+
+  References:
+    http://bl.ocks.org/mbostock/3244058
 
   Options:
     config = {
@@ -225,22 +415,34 @@ function d3htmlhash(json) {
       "var_x": "SPARQL variable name for x-axis values",
       "var_y": "SPARQL variable name for y-axis values",
       "var_r": "SPARQL variable name for radius",
-      "min_r": 1,     // minimum radius size
-      "max_r": 20,    // maximum radius size
-      "width": 850,   // canvas width
-      "height": 300,  // canvas height
-      "margin": 60,   // canvas margin
+      "min_r": 1,       // minimum radius size
+      "max_r": 20,      // maximum radius size
+      "width": 850,     // canvas width
+      "height": 300,    // canvas height
+      "margin_x": 80,   // canvas margin
+      "margin_y": 40,   // canvas margin
     }
 
   Synopsis:
     sparql(endpoint, query, render)
 
     function render(json) {
+      var config = { ... }
       d3scatterplot(json, config)
     }
 
-  TODO:
-    Fix the position of y-axis label to fit automatically
+  CSS/SVG:
+    <style>
+    .label {
+      font-size: 10pt;
+    }
+    .node circle {
+      stroke: black;
+      stroke-width: 1px;
+      fill: pink;
+      opacity: 0.5;
+    }
+    </style>
 */
 function d3scatterplot(json, config) {
   var head = json.head.vars
@@ -248,52 +450,74 @@ function d3scatterplot(json, config) {
   var extent_x = d3.extent(data, function(d) {return parseInt(d[config.var_x].value)})
   var extent_y = d3.extent(data, function(d) {return parseInt(d[config.var_y].value)})
   var extent_r = d3.extent(data, function(d) {return parseInt(d[config.var_r].value)})
-  var scale_x = d3.scale.linear().range([config.margin, config.width - config.margin]).domain(extent_x)
-  var scale_y = d3.scale.linear().range([config.height - config.margin, config.margin]).domain(extent_y)
+  var scale_x = d3.scale.linear().range([config.margin_x, config.width - config.margin_x]).domain(extent_x)
+  var scale_y = d3.scale.linear().range([config.height - config.margin_y, config.margin_y]).domain(extent_y)
   var scale_r = d3.scale.linear().range([config.min_r, config.max_r]).domain(extent_r)
   var axis_x = d3.svg.axis().scale(scale_x)
   var axis_y = d3.svg.axis().scale(scale_y).orient("left")
-  var label_offset_x = config.label_x.length * 4    // font-size / 2
-  var label_offset_y = config.label_y.length * 4    // font-size / 2
 
   var svg = d3.select("body")
     .append("svg")
     .attr("width", config.width)
     .attr("height", config.height)
-  svg.selectAll("circle")
+  var circle = svg.selectAll("circle")
     .data(data)
     .enter()
     .append("circle")
+    .attr("class", "node")
     .attr("cx", function(d) {return scale_x(d[config.var_x].value)})
     .attr("cy", function(d) {return scale_y(d[config.var_y].value)})
     .attr("r",  function(d) {return scale_r(d[config.var_r].value)})
-  svg.append("g")
+  var ax = svg.append("g")
     .attr("class", "x axis")
-    .attr("transform", "translate(0," + (config.height - config.margin) + ")")
+    .attr("transform", "translate(0," + (config.height - config.margin_y) + ")")
     .call(axis_x)
-  svg.append("g")
+  var ay = svg.append("g")
     .attr("class", "y axis")
-    .attr("transform", "translate(" + config.margin + ", 0)")
+    .attr("transform", "translate(" + config.margin_x + ",0)")
     .call(axis_y)
-  d3.select(".x.axis")
-    .append("text")
+  ax.append("text")
+    .attr("class", "label")
     .text(config.label_x)
-    .attr("x", (config.width - label_offset_x) / 2)
-    .attr("y", config.margin / 1.5)
-  d3.select(".y.axis")
-    .append("text")
+    .style("text-anchor", "middle")
+    .attr("transform", "translate(" + ((config.width - config.margin_x) / 2) + "," + (config.margin_y - 5) + ")")
+  ay.append("text")
+    .attr("class", "label")
     .text(config.label_y)
-    .attr("transform", "rotate(-90, -43, 0) translate(-170)")
-//  .attr("transform", "rotate(-90, -45, 0) translate(-" + label_offset_y + ")")
-//  .attr("transform", "rotate(-90), translate(-" + y_label_offset / 2 + ",-50)")
-//  .attr("transform", "rotate(-90, -" + label_offset_y / 2 + "0, 0)")
-//  .attr("transform", "rotate(-90, -" + config.margin - 40 + "0, 0) translate(-" + label_offset_y * 2 + ")");
-//  .attr("transform", "rotate(-90, -" + config.margin + "0, 0) translate(-" + label_offset_y * 2 + ")");
+    .style("text-anchor", "middle")
+    .attr("transform", "rotate(-90)")
+    .attr("x", 0 - (config.height / 2))
+    .attr("y", 0 - (config.margin_x - 20))
+
+  // default CSS/SVG
+  ax.attr({
+    "stroke": "black",
+    "fill": "none",
+  })
+  ay.attr({
+    "stroke": "black",
+    "fill": "none",
+  })
+  circle.attr({
+    "stroke": "gray",
+    "stroke-width": "1px",
+    "fill": "lightblue",
+    "opacity": 0.5,
+  })
+  //svg.selectAll(".label")
+  svg.selectAll("text").attr({
+    "stroke": "none",
+    "fill": "black",
+    "font-size": "8pt",
+    "font-family": "sans-serif",
+  })
 }
 
-
 /*
-  Force graph layout
+  Rendering sparql-results+json object into a force graph
+
+  References:
+    http://bl.ocks.org/mbostock/4062045
 
   Options:
     config = {
@@ -312,8 +536,26 @@ function d3scatterplot(json, config) {
       d3forcegraph(json, config)
     }
 
+  CSS/SVG:
+    <style>
+    .link {
+      stroke: #999;
+    }
+    .node {
+      stroke: black;
+      opacity: 0.5;
+    }
+    circle.node {
+      stroke-width: 1px;
+      fill: lightblue;
+    }
+    text.node {
+      font-family: "sans-serif";
+      font-size: 8px;
+    }
+    </style>
+
   TODO:
-    Provide an option to direct attributes of the nodes (colors etc.).
     Try other d3.layout.force options.
 */
 function d3forcegraph(json, config) {
@@ -355,10 +597,28 @@ function d3forcegraph(json, config) {
           .attr("cy", function(d) {return d.y})
   })
   node.call(force.drag)
+
+  // default CSS/SVG
+  link.attr({
+    "stroke": "#999999",
+  })
+  circle.attr({
+    "stroke": "black",
+    "stroke-width": "1px",
+    "fill": "lightblue",
+    "opacity": 0.5,
+  })
+  text.attr({
+    "font-size": "8px",
+    "font-family": "sans-serif",
+  })
 }
 
 /*
-  http://bl.ocks.org/4063550  Reingold-Tilford Tree
+  Rendering sparql-results+json object into a round tree
+
+  References:
+    http://bl.ocks.org/4063550  Reingold-Tilford Tree
 
   Options:
     config = {
@@ -374,6 +634,25 @@ function d3forcegraph(json, config) {
       var config = { ... }
       d3roundtree(json, config)
     }
+
+  CSS/SVG:
+    <style>
+    .link {
+      fill: none;
+      stroke: #ccc;
+      stroke-width: 1.5px;
+    }
+    .node circle {
+      fill: #fff;
+      stroke: darkgreen;
+      stroke-width: 1.5px;
+      opacity: 1;
+    }
+    .node text {
+      font-size: 10px;
+      font-family: sans-serif;
+    }
+    </style>
 */
 function d3roundtree(json, config) {
   var tree = sparql2tree(json, config)
@@ -402,19 +681,40 @@ function d3roundtree(json, config) {
     .append("g")
     .attr("class", "node")
     .attr("transform", function(d) {return "rotate(" + (d.x - 90) + ") translate(" + d.y + ")"})
-  node.append("circle")
+  var circle = node.append("circle")
     .attr("r", config.radius)
-  node.append("text")
+  var text = node.append("text")
     .attr("dy", ".35em")
     .attr("text-anchor", function(d) {return d.x < 180 ? "start" : "end"})
     .attr("transform", function(d) {return d.x < 180 ? "translate(8)" : "rotate(180) translate(-8)"})
     .text(function(d) {return d.name})
-  // for IFRAME embed (probably)
-  d3.select(self.frameElement).style("height", config.diameter - 150 + "px")
+
+  // default CSS/SVG
+  link.attr({
+    "fill": "none",
+    "stroke": "#cccccc",
+    "stroke-width": "1.5px",
+  })
+  circle.attr({
+    "fill": "#ffffff",
+    "stroke": "steelblue",
+    "stroke-width": "1.5px",
+    "opacity": 1,
+  })
+  text.attr({
+    "font-size": "10px",
+    "font-family": "sans-serif",
+  })
+
+  // for IFRAME embed
+  //d3.select(self.frameElement).style("height", config.diameter * 2 + "px")
 }
 
 /*
-  http://bl.ocks.org/4063570  Cluster Dendrogram
+  Rendering sparql-results+json object into a dendrogram
+
+  References:
+    http://bl.ocks.org/4063570  Cluster Dendrogram
 
   Options:
     config = {
@@ -430,6 +730,25 @@ function d3roundtree(json, config) {
       var config = { ... }
       d3dendrogram(json, config)
     }
+
+  CSS/SVG:
+    <style>
+    .link {
+      fill: none;
+      stroke: #ccc;
+      stroke-width: 1.5px;
+    }
+    .node circle {
+      fill: #fff;
+      stroke: steelblue;
+      stroke-width: 1.5px;
+      opacity: 1;
+    }
+    .node text {
+      font-size: 10px;
+      font-family: sans-serif;
+    }
+    </style>
 */
 function d3dendrogram(json, config) {
   var tree = sparql2tree(json, config)
@@ -454,20 +773,41 @@ function d3dendrogram(json, config) {
     .enter().append("g")
     .attr("class", "node")
     .attr("transform", function(d) {return "translate(" + d.y + "," + d.x + ")"})
-  node.append("circle")
+  var circle = node.append("circle")
     .attr("r", config.radius)
-  node.append("text")
+  var text = node.append("text")
     .attr("dx", function(d) {return (d.parent && d.children) ? -8 : 8})
     .attr("dy", 5)
     .style("text-anchor", function(d) {return (d.parent && d.children) ? "end" : "start"})
     .text(function(d) {return d.name})
-  // for IFRAME embed (probably)
-  d3.select(self.frameElement).style("height", config.height + "px")
+
+  // default CSS/SVG
+  link.attr({
+    "fill": "none",
+    "stroke": "#cccccc",
+    "stroke-width": "1.5px",
+  })
+  circle.attr({
+    "fill": "#ffffff",
+    "stroke": "steelblue",
+    "stroke-width": "1.5px",
+    "opacity": 1,
+  })
+  text.attr({
+    "font-size": "10px",
+    "font-family": "sans-serif",
+  })
+
+  // for IFRAME embed
+  //d3.select(self.frameElement).style("height", config.height + "px")
 }
 
 /*
-  http://bl.ocks.org/4348373  Zoomable Sunburst
-  http://www.jasondavies.com/coffee-wheel/  Coffee Flavour Wheel
+  Rendering sparql-results+json object into a sunburst
+
+  References:
+    http://bl.ocks.org/4348373  Zoomable Sunburst
+    http://www.jasondavies.com/coffee-wheel/  Coffee Flavour Wheel
 
   Options:
     config = {
@@ -482,6 +822,18 @@ function d3dendrogram(json, config) {
       var config = { ... }
       d3sunburst(json, config)
     }
+
+  CSS/SVG:
+    <style>
+    .node text {
+      font-size: 10px;
+      font-family: sans-serif;
+    }
+    .arc {
+      stroke: #fff;
+      fill-rule: evenodd;
+    }
+    </style>
 */
 function d3sunburst(json, config) {
   var tree = sparql2tree(json, config)
@@ -507,6 +859,7 @@ function d3sunburst(json, config) {
     .enter()
     .append("path")
     .attr("d", arc)
+    .attr("class", "arc")
     .style("fill", function(d) { return color((d.children ? d : d.parent).name) })
     .on("click", click)
   var text = svg.selectAll("text")
@@ -521,6 +874,16 @@ function d3sunburst(json, config) {
     .attr("dy", ".35em")
     .text(function(d) {return d.name})
     .on("click", click)
+
+  // default CSS/SVG
+  path.attr({
+    "stroke": "#ffffff",
+    "fill-rule": "evenodd",
+  })
+  text.attr({
+    "font-size": "10px",
+    "font-family": "sans-serif",
+  })
 
   function click(d) {
     path.transition()
@@ -567,12 +930,13 @@ function d3sunburst(json, config) {
     }
     return false
   }
-  // for IFRAME embed (probably)
-  d3.select(self.frameElement).style("height", config.height + "px");
 }
 
 /*
-  http://mbostock.github.com/d3/talk/20111116/pack-hierarchy.html  Circle Packing
+  Rendering sparql-results+json object into a circle pack
+
+  References:
+    http://mbostock.github.com/d3/talk/20111116/pack-hierarchy.html  Circle Packing
 
   Options:
     config = {
@@ -587,6 +951,34 @@ function d3sunburst(json, config) {
       var config = { ... }
       d3circlepack(json, config)
     }
+
+  CSS/SVG:
+    <style>
+    text {
+      font-size: 11px;
+      pointer-events: none;
+    }
+    text.parent {
+      fill: #1f77b4;
+    }
+    circle {
+      fill: #ccc;
+      stroke: #999;
+      pointer-events: all;
+    }
+    circle.parent {
+      fill: #1f77b4;
+      fill-opacity: .1;
+      stroke: steelblue;
+    }
+    circle.parent:hover {
+      stroke: #ff7f0e;
+      stroke-width: .5px;
+    }
+    circle.child {
+      pointer-events: none;
+    }
+    </style>
 
   TODO:
     Fix rotation angle for each text to avoid string collision
@@ -620,6 +1012,15 @@ function d3circlepack(json, config) {
     .attr("cx", function(d) { return d.x })
     .attr("cy", function(d) { return d.y })
     .attr("r", function(d) { return d.r })
+/*
+    // CSS: circle { ... }
+    .attr("fill", function(d) { return d.children ? "#1f77b4" : "#ccc" })
+    .attr("fill-opacity", function(d) { return d.children ? ".1" : "1" })
+    .attr("stroke", function(d) { return d.children ? "steelblue" : "#999" })
+    .attr("pointer-events", function(d) { return d.children ? "all" : "none" })
+    .on("mouseover", function() { d3.select(this).attr("stroke", "#ff7f0e").attr("stroke-width", ".5px") })
+    .on("mouseout", function() { d3.select(this).attr("stroke", "steelblue").attr("stroke-width", ".5px") })
+*/
     .on("click", function(d) { return zoom(node == d ? tree : d) })
 
   vis.selectAll("text")
@@ -629,11 +1030,12 @@ function d3circlepack(json, config) {
     .attr("class", function(d) { return d.children ? "parent" : "child" })
     .attr("x", function(d) { return d.x })
     .attr("y", function(d) { return d.y })
-    .attr("dy", ".35em")
-    .attr("text-anchor", "middle")
+//    .attr("dy", ".35em")
     .style("opacity", function(d) { return d.r > 20 ? 1 : 0 })
     .text(function(d) { return d.name })
     // rotate to avoid string collision
+    //.attr("text-anchor", "middle")
+    .attr("text-anchor", "start")
     .transition()
     .duration(1000)
     .attr("transform", function(d) { return "rotate(-30, " + d.x + ", " + d.y + ")"})
@@ -659,7 +1061,10 @@ function d3circlepack(json, config) {
 }
 
 /*
-  http://bl.ocks.org/4063582  Treemap
+  Rendering sparql-results+json object into a treemap
+
+  References:
+    http://bl.ocks.org/4063582  Treemap
 
   Options:
     config = {
@@ -675,6 +1080,18 @@ function d3circlepack(json, config) {
       var config = { ... }
       d3treemap(json, config)
     }
+
+  CSS/SVG:
+    <style>
+    .node {
+      border: solid 1px white;
+      font: 10px sans-serif;
+      line-height: 12px;
+      overflow: hidden;
+      position: absolute;
+      text-indent: 2px;
+    }
+    </style>
 */
 function d3treemap(json, config) {
   var tree = sparql2tree(json, config)
@@ -699,6 +1116,20 @@ function d3treemap(json, config) {
     .call(position)
     .style("background", function(d) {return d.children ? color(d.name) : null})
     .text(function(d) {return d.children ? null : d.name})
+
+  // default CSS/SVG
+  node.style({
+    "border-style": "solid",
+    "border-width": "1px",
+    "border-color": "white",
+    "font-size": "10px",
+    "font-family": "sans-serif",
+    "line-height": "12px",
+    "overflow": "hidden",
+    "position": "absolute",
+    "text-indent": "2px",
+  })
+
   function position() {
     this.style("left",   function(d) {return d.x + "px"})
         .style("top",    function(d) {return d.y + "px"})
@@ -923,8 +1354,8 @@ function d3map(json, config) {
         .rollup(function(d) {
           return d3.sum(d, function(d) {
             return parseInt(d.size.value)
-	  })
-	}).map(data, d3.map)
+          })
+        }).map(data, d3.map)
   //console.log(size)
   var extent = d3.extent((d3.map(size).values()))
 
@@ -942,11 +1373,11 @@ function d3map(json, config) {
     var path = d3.geo.path().projection(projection)
     switch (opts.color_scale) {
       case "log":
-	var scale = d3.scale.log()
-	break
+        var scale = d3.scale.log()
+        break
       default:
-	var scale = d3.scale.linear()
-	break
+        var scale = d3.scale.linear()
+        break
     }
     var color = scale.domain(extent).range([opts.color_min, opts.color_max])
 
@@ -958,7 +1389,7 @@ function d3map(json, config) {
       .attr("stroke", "black")
       .attr("stroke-width", 0.5)
       .style("fill", function(d, i) {
-	// map SPARQL results to colors
+        // map SPARQL results to colors
         return color(size[d.properties.name_local])
       })
 
@@ -977,4 +1408,3 @@ function d3map(json, config) {
       .text(function(d) { return d.properties.name_local; })
   })
 }
-

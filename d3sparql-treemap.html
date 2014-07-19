@@ -5,6 +5,7 @@
     <link rel="stylesheet" type="text/css" href="lib/bootstrap/css/bootstrap.css"/>
     <script src="lib/d3/d3.v3.min.js"></script>
     <script src="d3sparql.js"></script>
+    <script src="d3sparql-helper.js"></script>
     <script>
     function exec() {
       var endpoint = d3.select("#endpoint").property("value")
@@ -12,7 +13,7 @@
       sparql(endpoint, query, render)
     }
     function exec_offline() {
-      d3.json("data/taxonomy/tardigrada.json", render)
+      d3.json("cache/taxonomy/tardigrada.json", render)
     }
     function render(json) {
       var config = {
@@ -27,29 +28,7 @@
       }
       d3treemap(json, config)
     }
-
-    function toggle() {
-      var button = d3.select("#button")
-      var elem = d3.select("#sparql")
-      if (elem.style("display") == "none") {
-        elem.style("display", "inline")
-        button.attr("class", "icon-chevron-up")
-      } else {
-        elem.style("display", "none")
-        button.attr("class", "icon-chevron-down")
-      }
-    }
     </script>
-    <style>
-    .node {
-      border: solid 1px white;
-      font: 10px sans-serif;
-      line-height: 12px;
-      overflow: hidden;
-      position: absolute;
-      text-indent: 2px;
-    }
-    </style>
   </head>
   <body>
     <div id="query" style="margin: 10px">

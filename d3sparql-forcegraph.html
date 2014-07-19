@@ -5,15 +5,11 @@
     <link rel="stylesheet" type="text/css" href="lib/bootstrap/css/bootstrap.css"/>
     <script src="lib/d3/d3.v3.min.js"></script>
     <script src="d3sparql.js"></script>
-    <script src="d3sparql-helper.js"></script>
     <script>
     function exec() {
       var endpoint = d3.select("#endpoint").property("value")
-      var query = d3.select("#sparql").property("value")
-      sparql(endpoint, query, render)
-    }
-    function exec_offline() {
-      d3.json("cache/taxonomy/58669.json", render)
+      var sparql = d3.select("#sparql").property("value")
+      d3sparql.query(endpoint, sparql, render)
     }
     function render(json) {
       var config = {
@@ -29,7 +25,14 @@
         "width": 1000,
         "height": 750,
       }
-      d3forcegraph(json, config)
+      d3sparql.forcegraph(json, config)
+    }
+
+    function exec_offline() {
+      d3.json("cache/taxonomy/58669.json", render)
+    }
+    function toggle() {
+      d3sparql.toggle()
     }
     </script>
   </head>

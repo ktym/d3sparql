@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="lib/bootstrap/css/bootstrap.css"/>
+    <script src="lib/d3/d3.v3.min.js"></script>
+    <script src="lib/d3/sankey.js"></script>
+    <script src="lib/d3/topojson.v0.min.js"></script>
+    <script src="d3sparql.js"></script>
+    <script>
+    function exec() {
+      var endpoint = d3.select("#endpoint").property("value")
+      var sparql = d3.select("#sparql").property("value")
+      d3sparql.query(endpoint, sparql, render)
+    }
+    function render(json) {
+      var config = {
+        //"topojson": "d3map/land/japan.topojson",  // missing lat/lng
+        "topojson":  "lib/d3/map/japan.topojson",
+        //"color_scale": "linear",
+        "color_max": "red"
+      }
+      d3sparql.map(json, config)
+    }
+
+    function exec_offline() {
+      d3.json("cache/dbpedia/japan.json", render)
+    }
+    function toggle() {
+      d3sparql.toggle()
+    }
+    </script>
+  </head>
+  <body>
+    <div id="query" style="margin: 10px">
+      <h1>d3map</h1>
+      <form class="form-inline">
+        <label>SPARQL endpoint:</label>
+        <div class="input-append">
+          <input id="endpoint" class="span5" value="http://dbpedia.org/sparql" type="text">
+          <button class="btn" type="button" onclick="exec()">Query</button>
+          <button class="btn" type="button" onclick="exec_offline()">Use cache</button>
+          <button class="btn" type="button" onclick="toggle()"><i id="button" class="icon-chevron-up"></i></button>
+        </div>
+      </form>
+      <textarea id="sparql" class="span9" rows=15>
+PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX yago: <http://dbpedia.org/class/yago/>
+
+SELECT DISTINCT ?s ?label ?population ?area (?density AS ?size)
+WHERE {
+  ?s a yago:PrefecturesOfJapan ;
+     rdfs:label ?label ;
+     dbpedia-owl:populationTotal ?population ;
+     dbpedia-owl:areaTotal ?area .
+  BIND (xsd:float(?population)/xsd:float(?area/1000000) AS ?density)
+  FILTER (lang(?label) = 'ja' )
+}
+ORDER BY DESC(?density)
+      </textarea>
+    </div>
+  </body>
+</html>

@@ -98,6 +98,7 @@ d3sparql.query = function(endpoint, sparql, callback) {
     function render(json) {
       var config = { ... }
       d3sparql.forcegraph(json, config)
+      d3sparql.sankey(json, config)
     }
 
   TODO:
@@ -417,6 +418,79 @@ d3sparql.barchart = function(json, config) {
     "font-size": "8pt",
     "font-family": "sans-serif",
   })
+}
+
+/*
+  Rendering sparql-results+json object into a pie chart
+
+  References:
+    http://bl.ocks.org/mbostock/3887235 Pie chart
+    http://bl.ocks.org/mbostock/3887193 Donut chart
+
+  Options:
+    config = {
+      "label": "pref",
+      "size": "area",
+      "width":  700,
+      "height": 600,
+      "margin":  10,
+      "hole":    50,
+    }
+
+  Synopsis:
+    d3sparql.query(endpoint, sparql, render)
+
+    function render(json) {
+      var config = { ... }
+      d3sparql.piechart(json, config)
+    }
+
+  CSS/SVG:
+    <style>
+    body {
+      font: 10px sans-serif;
+    }
+    .arc path {
+      stroke: #fff;
+    }
+    </style>
+*/
+d3sparql.piechart = function(json, config) {
+  var head = json.head.vars
+  var data = json.results.bindings
+
+  var radius = Math.min(config.width, config.height) / 2 - config.margin
+  var hole = Math.max(Math.min(radius - 50, config.hole), 0)
+  var color = d3.scale.category20()
+
+  var arc = d3.svg.arc()
+    .outerRadius(radius)
+    .innerRadius(hole)
+
+  var pie = d3.layout.pie()
+    //.sort(null)
+    .value(function(d) {return d[config.size].value})
+
+  var svg = d3.select("body")
+    .append("svg")
+    .attr("width", config.width)
+    .attr("height", config.height)
+    .append("g")
+    .attr("transform", "translate(" + config.width / 2 + "," + config.height / 2 + ")")
+
+  var g = svg.selectAll(".arc")
+    .data(pie(data))
+    .enter()
+    .append("g")
+    .attr("class", "arc")
+  g.append("path")
+    .attr("d", arc)
+    .attr("fill", function(d, i) { return color(i) })
+  g.append("text")
+    .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")" })
+    .attr("dy", ".35em")
+    .attr("text-anchor", "middle")
+    .text(function(d) { return d.data[config.label].value })
 }
 
 /*

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="lib/bootstrap/css/bootstrap.css"/>
+    <script src="lib/d3/d3.v3.min.js"></script>
+    <script src="lib/d3/sankey.js"></script>
+    <script src="d3sparql.js"></script>
+    <script>
+    function exec() {
+      var endpoint = d3.select("#endpoint").property("value")
+      var sparql = d3.select("#sparql").property("value")
+      d3sparql.query(endpoint, sparql, render)
+    }
+    function render(json) {
+      var config = {
+        // for sparql2graph()
+        "key1": "parent",
+        "key2": "child",
+        "label1": "parent_name",
+        "label2": "child_name",
+        // for d3sankey()
+        "width":   750,
+        "height": 1200,
+        "margin":   10,
+      }
+      d3sparql.sankey(json, config)
+    }
+
+    function exec_offline() {
+      d3.json("cache/dbpedia/proglang.json", render)
+    }
+    function toggle() {
+      d3sparql.toggle()
+    }
+    </script>
+    <style>
+    .node rect {
+      cursor: move;
+      fill-opacity: .9;
+      shape-rendering: crispEdges;
+    }
+    .node text {
+      pointer-events: none;
+      text-shadow: 0 1px 0 #fff;
+    }
+    .link {
+      fill: none;
+      stroke: #000;
+      stroke-opacity: .2;
+    }
+    .link:hover {
+      stroke-opacity: .5;
+    }
+    </style>
+  </head>
+  <body>
+    <div id="query" style="margin: 10px">
+      <h1>d3sankey</h1>
+      <form class="form-inline">
+        <label>SPARQL endpoint:</label>
+        <div class="input-append">
+          <input id="endpoint" class="span5" value="http://dbpedia.org/sparql" type="text">
+          <button class="btn" type="button" onclick="exec()">Query</button>
+          <button class="btn" type="button" onclick="exec_offline()">Use cache</button>
+          <button class="btn" type="button" onclick="toggle()"><i id="button" class="icon-chevron-up"></i></button>
+        </div>
+      </form>
+      <textarea id="sparql" class="span9" rows=15>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>
+PREFIX dbpprop: <http://dbpedia.org/property/>
+PREFIX dbpedia: <http://dbpedia.org/resource/>
+
+SELECT DISTINCT ?parent ?parent_name ?child ?child_name
+WHERE {
+  VALUES ?root { dbpedia:Fortran }
+  ?root   rdf:type dbpedia-owl:ProgrammingLanguage ;
+          rdfs:label ?root_label .
+  ?parent rdf:type dbpedia-owl:ProgrammingLanguage ;
+          rdfs:label ?parent_label ;
+          dbpprop:year ?parent_year .
+  ?child  rdf:type dbpedia-owl:ProgrammingLanguage ;
+          rdfs:label ?child_label ;
+          dbpprop:year ?child_year .
+  ?root   dbpedia-owl:influenced* ?child .
+  ?parent dbpedia-owl:influenced ?child .
+  BIND (xsd:integer(?parent_year) AS ?pyear)
+  FILTER (?pyear > 1950 and ?pyear < 2020)
+  BIND (xsd:integer(?child_year) AS ?cyear)
+  FILTER (?cyear > 1950 and ?cyear < 2020)
+  FILTER (?pyear < ?cyear)
+  FILTER (?root != ?child)
+  FILTER (?parent != ?child)
+  FILTER (LANG(?root_label) = 'en')
+  FILTER (LANG(?parent_label) = 'en')
+  FILTER (LANG(?child_label) = 'en')
+  BIND (replace(?parent_label, " .programming language.", "") AS ?parent_name)
+  BIND (replace(?child_label, " .programming language.", "") AS ?child_name)
+}
+      </textarea>
+    </div>
+  </body>
+</html>

@@ -633,6 +633,128 @@ d3sparql.forcegraph = function(json, config) {
 }
 
 /*
+  Rendering sparql-results+json object into a sanky graph
+
+  References:
+    https://github.com/d3/d3-plugins/tree/master/sankey
+    http://bost.ocks.org/mike/sankey/
+
+  Options:
+    config = {
+      "key1": "parent",
+      "key2": "child",
+      "label1": "parent_label",
+      "label2": "child_label",
+      "width": 1000,
+      "height": 900,
+      "margin":  50,
+    }
+
+  Synopsis:
+    d3sparql.query(endpoint, sparql, render)
+
+    function render(json) {
+      var config = { ... }
+      d3sparql.sankey(json, config)
+    }
+
+  CSS/SVG:
+    <style>
+    .node rect {
+      cursor: move;
+      fill-opacity: .9;
+      shape-rendering: crispEdges;
+    }
+    .node text {
+      pointer-events: none;
+      text-shadow: 0 1px 0 #fff;
+    }
+    .link {
+      fill: none;
+      stroke: #000;
+      stroke-opacity: .2;
+    }
+    .link:hover {
+      stroke-opacity: .5;
+    }
+    </style>
+
+  Dependencies:
+    Download sankey.js from https://github.com/d3/d3-plugins/tree/master/sankey
+    <script src="sankey.js"></script>
+*/
+d3sparql.sankey = function(json, config) {
+  var graph = d3sparql.graph(json, config)
+  var nodes = graph.nodes
+  var links = graph.links
+  for (var i = 0; i < links.length; i++) {
+    links[i].value = 2  // TODO: fix to use values on links
+  }
+  var sankey = d3.sankey()
+    .size([config.width, config.height])
+    .nodeWidth(15)
+    .nodePadding(10)
+    .nodes(nodes)
+    .links(links)
+    .layout(32)
+  var path = sankey.link()
+  var color = d3.scale.category20()
+  var svg = d3.select("body").append("svg")
+    .attr("width", config.width + config.margin * 2)
+    .attr("height", config.height + config.margin * 2)
+    .append("g")
+    .attr("transform", "translate(" + config.margin + "," + config.margin + ")")
+  var link = svg.selectAll(".link")
+    .data(links)
+    .enter()
+    .append("path")
+    .attr("class", "link")
+    .attr("d", path)
+    .attr("stroke-width", function(d) {return Math.max(1, d.dy)})
+    .sort(function(a, b) {return b.dy - a.dy})
+  var node = svg.selectAll(".node")
+    .data(nodes)
+    .enter()
+    .append("g")
+    .attr("class", "node")
+    .attr("transform", function(d) {return "translate(" + d.x + "," + d.y + ")"})
+    .call(d3.behavior.drag()
+       .origin(function(d) {return d})
+       .on("dragstart", function() {this.parentNode.appendChild(this)})
+       .on("drag", dragmove)
+     )
+  node.append("rect")
+    .attr("width", function(d) {return d.dx})
+    .attr("height", function(d) {return d.dy})
+    .attr("fill", function(d) {return color(d.label)})
+    .attr("opacity", 0.5)
+  node.append("text")
+    .attr("x", -6)
+    .attr("y", function(d) {return d.dy/2})
+    .attr("dy", ".35em")
+    .attr("text-anchor", "end")
+    .attr("transform", null)
+    .text(function(d) {return d.label})
+    .filter(function(d) {return d.x < config.width / 2})
+    .attr("x", 6 + sankey.nodeWidth())
+    .attr("text-anchor", "start")
+
+  // default CSS/SVG
+  link.attr({
+    "fill": "none",
+    "stroke": "grey",
+    "opacity": 0.5,
+  })
+
+  function dragmove(d) {
+    d3.select(this).attr("transform", "translate(" + d.x + "," + (d.y = Math.max(0, Math.min(config.height - d.dy, d3.event.y))) + ")")
+    sankey.relayout()
+    link.attr("d", path)
+  }
+}
+
+
+/*
   Rendering sparql-results+json object into a round tree
 
   References:

@@ -7,20 +7,7 @@
 //
 
 var d3sparql = {
-  version: "d3sparql.js version 2014-07-19"
-}
-
-/* Helper function only for the d3sparql web site */
-d3sparql.toggle = function() {
-  var button = d3.select("#button")
-  var elem = d3.select("#sparql")
-  if (elem.style("display") == "none") {
-    elem.style("display", "inline")
-    button.attr("class", "icon-chevron-up")
-  } else {
-    elem.style("display", "none")
-    button.attr("class", "icon-chevron-down")
-  }
+  version: "d3sparql.js version 2014-07-22"
 }
 
 /*
@@ -342,6 +329,15 @@ d3sparql.htmlhash = function(json) {
     </style>
 */
 d3sparql.barchart = function(json, config) {
+  var opts = {
+    "label_x":  config.label_x  || "label_x",
+    "label_y":  config.label_y  || "label_y",
+    "var_x":    config.key_x    || "var_x",  // TODO: var name, default value
+    "var_y":    config.key_y    || "var_y",
+    "width":    config.width    || 750,
+    "height":   config.height   || 300,
+    "margin":   config.margin   || {top: 10, right: 10, bottom: 80, left: 80} // TODO: to make use of this
+  }
   var head = json.head.vars
   var data = json.results.bindings
 
@@ -698,7 +694,7 @@ d3sparql.forcegraph = function(json, config) {
     "stroke": "black",
     "stroke-width": "1px",
     "fill": "lightblue",
-    "opacity": 0.5,
+    "opacity": 1,
   })
   text.attr({
     "font-size": "8px",
@@ -873,7 +869,7 @@ d3sparql.roundtree = function(json, config) {
   var tree = d3sparql.tree(json, config)
   var tree_layout = d3.layout.tree()
     .size([config.angle, config.depth])
-    .separation(function(a, b) {return (a.parent == b.parent ? 1 : 2) / a.depth})
+    .separation(function(a, b) {return (a.parent === b.parent ? 1 : 2) / a.depth})
   var nodes = tree_layout.nodes(tree)
   var links = tree_layout.links(nodes)
   var diagonal = d3.svg.diagonal.radial()
@@ -1239,7 +1235,7 @@ d3sparql.circlepack = function(json, config) {
     .on("mouseover", function() { d3.select(this).attr("stroke", "#ff7f0e").attr("stroke-width", ".5px") })
     .on("mouseout", function() { d3.select(this).attr("stroke", "steelblue").attr("stroke-width", ".5px") })
 */
-    .on("click", function(d) { return zoom(node == d ? tree : d) })
+    .on("click", function(d) { return zoom(node === d ? tree : d) })
 
   vis.selectAll("text")
     .data(nodes)
@@ -1626,4 +1622,18 @@ d3sparql.map = function(json, config) {
       .attr("dx", "-1.5em")
       .text(function(d) { return d.properties.name_local; })
   })
+}
+
+
+/* Helper function only for the d3sparql web site */
+d3sparql.toggle = function() {
+  var button = d3.select("#button")
+  var elem = d3.select("#sparql")
+  if (elem.style("display") === "none") {
+    elem.style("display", "inline")
+    button.attr("class", "icon-chevron-up")
+  } else {
+    elem.style("display", "none")
+    button.attr("class", "icon-chevron-down")
+  }
 }

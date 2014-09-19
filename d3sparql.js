@@ -52,19 +52,19 @@ d3sparql.query = function(endpoint, sparql, callback) {
   var url = endpoint + "?query=" + encodeURIComponent(sparql)
   console.log(endpoint)
   console.log(url)
-/*
   var mime = "application/sparql-results+json"
   d3.xhr(url, mime, function(request) {
     var json = request.responseText
     console.log(json)
     callback(JSON.parse(json))
   })
-*/
+/*
   d3.json(url, function(error, json) {
     console.log(error)
     console.log(json)
     callback(json)
   })
+*/
 }
 
 /*

@@ -145,6 +145,7 @@ d3sparql.tree = function(json, config) {
   var data = json.results.bindings
   var tree = d3.map()
   var parent = child = children = true
+  var root = data[0][config.root].value
   for (var i = 0; i < data.length; i++) {
     parent = data[i][config.parent].value
     child = data[i][config.child].value
@@ -167,7 +168,7 @@ d3sparql.tree = function(json, config) {
       return {"name": node, "size": 1}
     }
   }
-  return traverse(config.root)
+  return traverse(root)
 }
 
 /*

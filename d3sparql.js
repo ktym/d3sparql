@@ -149,13 +149,15 @@ d3sparql.tree = function(json, config) {
   for (var i = 0; i < data.length; i++) {
     parent = data[i][config.parent].value
     child = data[i][config.child].value
-    if (tree.has(parent)) {
-      children = tree.get(parent)
-      children.push(child)
-      tree.set(parent, children)
-    } else {
-      children = [child]
-      tree.set(parent, children)
+    if (parent != child) {
+      if (tree.has(parent)) {
+        children = tree.get(parent)
+        children.push(child)
+        tree.set(parent, children)
+      } else {
+        children = [child]
+        tree.set(parent, children)
+      }
     }
   }
   function traverse(node) {

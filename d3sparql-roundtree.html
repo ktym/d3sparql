@@ -14,7 +14,7 @@
     function render(json) {
       var config = {
         // for sparql2tree()
-        "root": "Hypsibiidae",
+        "root": "root_name",
         "parent": "parent_name",
         "child": "child_name",
         // for d3roundtree()
@@ -49,11 +49,12 @@
       <textarea id="sparql" class="span9" rows=15>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX up: <http://purl.uniprot.org/core/>
-SELECT ?parent_name ?child_name
+SELECT ?root_name ?parent_name ?child_name
 FROM <http://togogenome.org/graph/uniprot/>
 WHERE
 {
-  ?root up:scientificName "Hypsibiidae" .
+  VALUES ?root_name { "Hypsibiidae" }
+  ?root up:scientificName ?root_name .
   ?child rdfs:subClassOf+ ?root .
   ?child rdfs:subClassOf ?parent .
   ?child up:scientificName ?child_name .

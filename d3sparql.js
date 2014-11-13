@@ -1530,6 +1530,99 @@ d3sparql.treemapzoom = function(json, config) {
   }
 }
 
+
+/* World Map usable with GeoLocation data (i.e. Longitude and Latitude)
+ 
+	Options:
+		config = {
+			"radius": 5 // circles radius
+			"color": #FF3333 // circles colors
+			"map": "map/world-50m.json" // default location of GeoMap JSON
+	} 
+  Synopsis:
+    d3sparql.query(endpoint, sparql, render)
+
+    function render(json) {
+      d3sparql.geomap(json, config = {})
+    }
+*/
+d3sparql.geomap = function(json,config) {
+
+
+  var head = json.head.vars
+  var data = json.results.bindings
+	
+	var opts = {
+		"radius": config.radius || 5,
+		"color": config.color || "#FF3333",
+		"map": config.map || "map/world-50m.json"
+	} 
+
+	var width = 960,
+			height = 480;
+	
+	var projection = d3.geo.equirectangular()
+			.scale(153)
+			.translate([width / 2, height / 2])
+			.precision(.1);
+	
+	var path = d3.geo.path()
+			.projection(projection);
+
+	var graticule = d3.geo.graticule();
+
+	var svg = d3.select("body").append("svg")
+			.attr("width", width)
+			.attr("height", height);
+
+	svg.append("path")
+		.datum(graticule.outline)
+		.attr("fill","#a4bac7")
+		.attr("d",path);
+
+	svg.append("path")
+			.datum(graticule)
+			.attr("fill","none")
+			.attr("stroke","#333")
+			.attr("stroke-width",".5px")
+			.attr("stroke-opacity",".5")
+			.attr("d", path);
+
+
+	d3.json(opts.map, function(error, world) {
+		svg.insert("path", ".graticule")
+				.datum(topojson.feature(world, world.objects.land))
+				.attr("fill", "#d7c7ad")
+				.attr("stroke", "#766951")
+				.attr("d", path);
+
+		svg.insert("path", ".graticule")
+				.datum(topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }))
+				.attr("class", "boundary")
+  			.attr("fill", "none")
+  			.attr("stroke", "#a5967e")
+  			.attr("stroke-width", ".5px")
+				.attr("d", path);
+
+
+		svg.selectAll(".pin")
+			.data(data)
+			.enter().append("circle", ".pin")
+			.attr("fill",opts.color)
+			.attr("r", opts.radius)
+			.attr("stroke","#455346")
+			.attr("transform", function(d) {
+				return "translate(" + projection([
+					d.longVal.value,
+					d.latVal.value
+				]) + ")"
+			});
+
+	});
+
+	d3.select(self.frameElement).style("height", height + "px");
+}
+
 /*
   Japanese map + values for each prefecture in color
 

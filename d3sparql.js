@@ -1538,6 +1538,7 @@ d3sparql.treemapzoom = function(json, config) {
 			"radius": 5 // circles radius
 			"color": #FF3333 // circles colors
 			"map": "map/world-50m.json" // default location of GeoMap JSON
+                                  // https://github.com/mbostock/topojson/blob/master/examples/world-50m.json
 	} 
   Synopsis:
     d3sparql.query(endpoint, sparql, render)

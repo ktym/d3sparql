@@ -4,7 +4,6 @@
   <head>
     <link rel="stylesheet" type="text/css" href="lib/bootstrap/css/bootstrap.css"/>
     <script src="lib/d3/d3.v3.min.js"></script>
-    <script src="lib/d3/sankey.js"></script>
     <script src="lib/d3/topojson.v0.min.js"></script>
     <script src="d3sparql.js"></script>
     <script>
@@ -15,12 +14,11 @@
     }
     function render(json) {
       var config = {
-        //"topojson": "d3map/land/japan.topojson",  // missing lat/lng
         "topojson":  "lib/d3/map/japan.topojson",
         //"color_scale": "linear",
         "color_max": "red"
       }
-      d3sparql.map(json, config)
+      d3sparql.namedmap(json, config)
     }
 
     function exec_offline() {
@@ -33,7 +31,7 @@
   </head>
   <body>
     <div id="query" style="margin: 10px">
-      <h1>d3map</h1>
+      <h1>d3namedmap</h1>
       <form class="form-inline">
         <label>SPARQL endpoint:</label>
         <div class="input-append">

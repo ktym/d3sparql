@@ -13,21 +13,21 @@
     }
     function render(json) {
       var config = {
-        // for sparql2tree()
+        // for d3sparql.tree()
         "root": "root_name",
         "parent": "parent_name",
         "child": "child_name",
-        // for d3roundtree()
+        // for d3sparql.roundtree()
         "diameter": 800,
         "angle": 360,
         "depth": 200,
-        "radius": 5,
+        "radius": 20,
       }
       d3sparql.roundtree(json, config)
     }
 
     function exec_offline() {
-      d3.json("cache/taxonomy/tardigrada.json", render)
+      d3.json("cache/taxonomy/hypsibiidae.json", render)
     }
     function toggle() {
       d3sparql.toggle()

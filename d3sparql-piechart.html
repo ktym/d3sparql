@@ -12,14 +12,13 @@
       d3sparql.query(endpoint, sparql, render)
     }
     function render(json) {
-      console.log(json)
-      config = {
+      var config = {
         "label": "pref",
         "size": "area",
-        "width":  700,  // canvas width
-        "height": 700,  // canvas height
+        "width":  600,  // canvas width
+        "height": 600,  // canvas height
         "margin":  10,  // canvas margin
-        "hole":   100,  // doughnut hole: 0 for pie, r > 0 for doughnut
+        "hole":   200,  // doughnut hole: 0 for pie, r > 0 for doughnut
       }
       d3sparql.piechart(json, config)
     }
@@ -32,11 +31,8 @@
     }
     </script>
     <style>
-    body {
+    .label {
       font: 10px sans-serif;
-    }
-    .arc path {
-      stroke: #fff;
     }
     </style>
   </head>

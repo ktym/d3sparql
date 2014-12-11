@@ -96,10 +96,10 @@ d3sparql.graph = function(json, config) {
   var data = json.results.bindings
 
   var opts = {
-    "key1":   head[0] || "key1",
-    "key2":   head[1] || "key2",
-    "label1": head[2] || false,  // optional
-    "label2": head[3] || false,  // optional
+    "key1":   config.key1   || head[0] || "key1",
+    "key2":   config.key2   || head[1] || "key2",
+    "label1": config.label1 || head[2] || false,  // optional
+    "label2": config.label2 || head[3] || false,  // optional
   }
   var graph = {
     "nodes": [],

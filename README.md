@@ -62,7 +62,7 @@ Semantic Web technologies are being widely applied in life sciences. Major bioin
 
 * http://biohackathon.org/d3sparql
 
-### Code base
+### Codebase
 
 * https://github.com/ktym/d3sparql
 
@@ -76,7 +76,7 @@ Semantic Web technologies are being widely applied in life sciences. Major bioin
 
 ### ChangeLog
 
-https://github.com/ktym/d3sparql/commits/master/d3sparql.js
+See details at https://github.com/ktym/d3sparql/commits/master/d3sparql.js
 
 * 2014-07-03 Made publicly available at GitHub
 * 2015-02-03 Added README file, updated namedmap to use an option for scale

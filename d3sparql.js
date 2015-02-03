@@ -7,7 +7,7 @@
 //
 
 var d3sparql = {
-  version: "d3sparql.js version 2014-12-10"
+  version: "d3sparql.js version 2015-01-07"
 }
 
 /*
@@ -1764,7 +1764,8 @@ d3sparql.namedmap = function(json, config) {
     "topojson":     config.topojson    || "japan.topojson",
     "mapname":      config.mapname     || "japan",
     "center_lat":   config.center_lat  || 34,
-    "center_lng":   config.center_lng  || 137
+    "center_lng":   config.center_lng  || 137,
+    "scale":        config.scale       || 10000
   }
 
   // uses ?size for numbers, ?label for geo names
@@ -1775,7 +1776,7 @@ d3sparql.namedmap = function(json, config) {
             return parseInt(d.size.value)
           })
         }).map(data, d3.map)
-  //console.log(size)
+  console.log(size)
   var extent = d3.extent((d3.map(size).values()))
 
   var svg = d3.select("body")
@@ -1788,7 +1789,7 @@ d3sparql.namedmap = function(json, config) {
     var projection = d3.geo.mercator()
       .center([opts.center_lng, opts.center_lat])
       .translate([opts.width/2, opts.height/2])
-      .scale(10000)
+      .scale(opts.scale)
     var path = d3.geo.path().projection(projection)
     switch (opts.color_scale) {
       case "log":

@@ -24,6 +24,7 @@
         "height": 300,
         "margin_x": 80,
         "margin_y": 40,
+        "selector": "#result"
       }
       d3sparql.scatterplot(json, config)
       d3sparql.htmltable(json)
@@ -86,6 +87,6 @@ where {
 } order by desc(?genes) limit 100
       </textarea>
     </div>
-    <div id="graph"></div>
+    <div id="result"></div>
   </body>
 </html>

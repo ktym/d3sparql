@@ -78,6 +78,7 @@ Semantic Web technologies are being widely applied in life sciences. Major bioin
 
 See details at https://github.com/ktym/d3sparql/commits/master/d3sparql.js
 
+* 2013-01-28 Project started
 * 2014-07-03 Made publicly available at GitHub
 * 2014-07-19 Introduced d3sparql name space
 * 2014-07-20 Added Pie, Doughnut, Sankey diagram
@@ -86,5 +87,6 @@ See details at https://github.com/ktym/d3sparql/commits/master/d3sparql.js
 * 2015-02-03 Added README file
   * updated namedmap to use an option for scale
   * merged a pull request to insert visualization at the specified DOM ID instead of appending to the body
+* 2015-02-04 Improved to customize the target DOM ID
 
 

@@ -16,7 +16,8 @@
       var config = {
         "topojson":  "lib/d3/map/japan.topojson",
         //"color_scale": "linear",
-        "color_max": "red"
+        "color_max": "red",
+        "selector": "#result"
       }
       d3sparql.namedmap(json, config)
     }
@@ -58,6 +59,6 @@ WHERE {
 ORDER BY DESC(?density)
       </textarea>
     </div>
-    <div id="graph"></div>
+    <div id="result"></div>
   </body>
 </html>

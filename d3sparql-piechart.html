@@ -19,6 +19,7 @@
         "height": 600,  // canvas height
         "margin":  10,  // canvas margin
         "hole":   200,  // doughnut hole: 0 for pie, r > 0 for doughnut
+        "selector": "#result"
       }
       d3sparql.piechart(json, config)
     }
@@ -64,6 +65,6 @@ WHERE {
 ORDER BY DESC(?area)
       </textarea>
     </div>
-    <div id="graph"></div>
+    <div id="result"></div>
   </body>
 </html>

@@ -12,7 +12,10 @@
       d3sparql.query(endpoint, sparql, render)
     }
     function render(json) {
-      d3sparql.htmlhash(json)
+      var config = {
+        "selector": "#result"
+      }
+      d3sparql.htmlhash(json, config)
     }
 
     function exec_offline() {
@@ -66,6 +69,6 @@ WHERE {
 } limit 1
       </textarea>
     </div>
-    <div id="graph"></div>
+    <div id="result"></div>
   </body>
 </html>

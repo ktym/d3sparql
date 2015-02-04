@@ -20,7 +20,8 @@
         "height": 480,
         "radius": 5,
         "color": "#55C25E",
-        "topojson":  "lib/d3/map/world-50m.json",
+        "topojson": "lib/d3/map/world-50m.json",
+        "selector": "#result"
       }
       d3sparql.coordmap(json, config)
     }
@@ -77,6 +78,6 @@ WHERE {
 } LIMIT 1000
       </textarea>
     </div>
-    <div id="graph"></div>
+    <div id="result"></div>
   </body>
 </html>

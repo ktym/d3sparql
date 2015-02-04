@@ -12,6 +12,9 @@
       d3sparql.query(endpoint, sparql, render)
     }
     function render(json) {
+      var config = {
+        "selector": "#result"
+      }
       d3sparql.htmltable(json)
     }
 
@@ -72,6 +75,6 @@ where {
 } order by desc(?genes) limit 100
       </textarea>
     </div>
-    <div id="graph"></div>
+    <div id="result"></div>
   </body>
 </html>

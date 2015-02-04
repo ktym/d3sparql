@@ -20,6 +20,7 @@
         "width":  700,  // canvas width
         "height": 300,  // canvas height
         "margin":  80,  // canvas margin
+        "selector": "#result"
       }
       d3sparql.barchart(json, config)
     }
@@ -65,6 +66,6 @@ WHERE {
 ORDER BY DESC(?area)
       </textarea>
     </div>
-    <div id="graph"></div>
+    <div id="result"></div>
   </body>
 </html>

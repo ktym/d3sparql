@@ -37,7 +37,9 @@ Semantic Web technologies are being widely applied in life sciences. Major bioin
   }
   function render(json) {
     // set options and call the d3xxxxx function in this library ...
-    var config = { ... }
+    var config = {
+	  "selector": "#result"
+	}
     d3sparql.xxxxx(json, config)
   }
   </script>
@@ -54,6 +56,7 @@ Semantic Web technologies are being widely applied in life sciences. Major bioin
     WHERE { ... }
    </textarea>
   </form>
+  <div id="result"></div>
  </body>
 </html>
 ```

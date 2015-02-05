@@ -83,8 +83,12 @@ See details at https://github.com/ktym/d3sparql/commits/master/d3sparql.js
 
 * 2013-01-28 Project started
 * 2014-07-03 Made publicly available at GitHub
+* 2014-07-14 Added bar/line charts with scales
+* 2014-07-17 Added default SVG attributes equivalent to CSS styles
+  * Visualizations look good without CSS by default (user can customize style by CSS)
+  * Added descriptions to each visualization function
 * 2014-07-19 Introduced d3sparql name space
-* 2014-07-20 Added Pie, Doughnut, Sankey diagram
+* 2014-07-20 Added Pie, Doughnut and Sankey diagram
 * 2014-11-13 Merged a pull request to visualize a coordination based map
 * 2014-12-11 Updated to set default values in options
 * 2015-02-03 Added README file

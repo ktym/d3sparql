@@ -201,7 +201,8 @@ d3sparql.tree = function(json, config) {
     d3sparql.query(endpoint, sparql, render)
 
     function render(json) {
-      d3sparql.htmltable(json)
+      var config = { ... }
+      d3sparql.htmltable(json, config)
     }
 
   CSS:
@@ -217,7 +218,7 @@ d3sparql.tree = function(json, config) {
     }
     </style>
 */
-d3sparql.htmltable = function(json) {
+d3sparql.htmltable = function(json, config) {
   var head = json.head.vars
   var data = json.results.bindings
 
@@ -270,7 +271,8 @@ d3sparql.htmltable = function(json) {
     d3sparql.query(endpoint, sparql, render)
 
     function render(json) {
-      d3sparql.htmlhash(json)
+      var config = { ... }
+      d3sparql.htmlhash(json, config)
     }
 
   CSS:

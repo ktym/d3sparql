@@ -95,5 +95,6 @@ See details at https://github.com/ktym/d3sparql/commits/master/d3sparql.js
   * updated namedmap to use an option for scale
   * merged a pull request to insert visualization at the specified DOM ID instead of appending to the body
 * 2015-02-04 Improved to customize the target DOM ID
+* 2015-02-06 Changed to clear the DOM contents before appending elements to update the visualization
 
 

@@ -226,7 +226,7 @@ d3sparql.htmltable = function(json, config) {
     "selector": config.selector || "#result"
   }
 
-  var table = d3.select(opts.selector).append("table").attr("class", "table table-bordered")
+  var table = d3.select(opts.selector).html("").append("table").attr("class", "table table-bordered")
   var thead = table.append("thead")
   var tbody = table.append("tbody")
   thead.append("tr")
@@ -296,7 +296,7 @@ d3sparql.htmlhash = function(json, config) {
     "selector": config.selector || "#result"
   }
 
-  var table = d3.select(opts.selector).append("table").attr("class", "table table-bordered")
+  var table = d3.select(opts.selector).html("").append("table").attr("class", "table table-bordered")
   var tbody = table.append("tbody")
   var row = tbody.selectAll("tr")
     .data(function() {
@@ -392,8 +392,7 @@ d3sparql.barchart = function(json, config) {
   scale_x.domain(data.map(function(d) {return d[opts.var_x].value}))
   scale_y.domain(d3.extent(data, function(d) {return parseInt(d[opts.var_y].value)}))
 
-  var svg = d3.select(opts.selector)
-    .append("svg")
+  var svg = d3.select(opts.selector).html("").append("svg")
     .attr("width", opts.width)
     .attr("height", opts.height)
 //    .append("g")
@@ -522,8 +521,7 @@ d3sparql.piechart = function(json, config) {
     //.sort(null)
     .value(function(d) {return d[opts.size].value})
 
-  var svg = d3.select(opts.selector)
-    .append("svg")
+  var svg = d3.select(opts.selector).html("").append("svg")
     .attr("width", opts.width)
     .attr("height", opts.height)
     .append("g")
@@ -628,8 +626,7 @@ d3sparql.scatterplot = function(json, config) {
   var axis_x = d3.svg.axis().scale(scale_x)
   var axis_y = d3.svg.axis().scale(scale_y).orient("left")
 
-  var svg = d3.select(opts.selector)
-    .append("svg")
+  var svg = d3.select(opts.selector).html("").append("svg")
     .attr("width", opts.width)
     .attr("height", opts.height)
   var circle = svg.selectAll("circle")
@@ -746,8 +743,7 @@ d3sparql.forcegraph = function(json, config) {
     "selector":  config.selector  || "#result"
   }
 
-  var svg = d3.select(opts.selector)
-    .append("svg")
+  var svg = d3.select(opts.selector).html("").append("svg")
     .attr("width", opts.width)
     .attr("height", opts.height)
   var link = svg.selectAll(".link")
@@ -876,8 +872,7 @@ d3sparql.sankey = function(json, config) {
     .layout(32)
   var path = sankey.link()
   var color = d3.scale.category20()
-  var svg = d3.select(opts.selector)
-    .append("svg")
+  var svg = d3.select(opts.selector).html("").append("svg")
     .attr("width", opts.width + opts.margin * 2)
     .attr("height", opts.height + opts.margin * 2)
     .append("g")
@@ -993,8 +988,7 @@ d3sparql.roundtree = function(json, config) {
   var links = tree_layout.links(nodes)
   var diagonal = d3.svg.diagonal.radial()
     .projection(function(d) {return [d.y, d.x / 180 * Math.PI]})
-  var svg = d3.select(opts.selector)
-    .append("svg")
+  var svg = d3.select(opts.selector).html("").append("svg")
     .attr("width", opts.diameter)
     .attr("height", opts.diameter)
     .append("g")
@@ -1097,8 +1091,7 @@ d3sparql.dendrogram = function(json, config) {
     .size([opts.height, opts.width - opts.margin])
   var diagonal = d3.svg.diagonal()
     .projection(function(d) {return [d.y, d.x]})
-  var svg = d3.select(opts.selector)
-    .append("svg")
+  var svg = d3.select(opts.selector).html("").append("svg")
     .attr("width", opts.width)
     .attr("height", opts.height)
     .append("g")
@@ -1193,8 +1186,7 @@ d3sparql.sunburst = function(json, config) {
   var x = d3.scale.linear().range([0, 2 * Math.PI])
   var y = d3.scale.sqrt().range([0, radius])
   var color = d3.scale.category20()
-  var svg = d3.select(opts.selector)
-    .append("svg")
+  var svg = d3.select(opts.selector).html("").append("svg")
     .attr("width", opts.width)
     .attr("height", opts.height)
     .append("g")
@@ -1361,7 +1353,7 @@ d3sparql.circlepack = function(json, config) {
   var node  = tree
   var nodes = pack.nodes(tree)
 
-  var vis = d3.select(opts.selector)
+  var vis = d3.select(opts.selector).html("")
     .insert("svg:svg", "h2")  // TODO: check if this svg: and h2 is required
     .attr("width", w)
     .attr("height", h)
@@ -1476,8 +1468,7 @@ d3sparql.treemap = function(json, config) {
     .size([width, height])
     .sticky(true)
     .value(function(d) {return d.size})
-  var div = d3.select(opts.selector)
-    .append("div")
+  var div = d3.select(opts.selector).html("").append("div")
     .style("position", "relative")
     .style("width", opts.width + "px")
     .style("height", opts.height + "px")
@@ -1728,8 +1719,7 @@ d3sparql.coordmap = function(json,config) {
   var path = d3.geo.path()
     .projection(projection);
   var graticule = d3.geo.graticule();
-  var svg = d3.select(opts.selector)
-    .append("svg")
+  var svg = d3.select(opts.selector).html("").append("svg")
     .attr("width", opts.width)
     .attr("height", opts.height);
 
@@ -1831,8 +1821,7 @@ d3sparql.namedmap = function(json, config) {
   console.log(size)
   var extent = d3.extent((d3.map(size).values()))
 
-  var svg = d3.select(opts.selector)
-    .append("svg")
+  var svg = d3.select(opts.selector).html("").append("svg")
     .attr("width", opts.width)
     .attr("height", opts.height)
 

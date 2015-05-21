@@ -7,7 +7,8 @@
 //
 
 var d3sparql = {
-  version: "d3sparql.js version 2015-05-20",
+  version: "d3sparql.js version 2015-05-21",
+  debug: false  // set to true for showing debug information
 }
 
 /*
@@ -50,18 +51,18 @@ var d3sparql = {
 */
 d3sparql.query = function(endpoint, sparql, callback) {
   var url = endpoint + "?query=" + encodeURIComponent(sparql)
-  console.log(endpoint)
-  console.log(url)
+  if (d3sparql.debug) { console.log(endpoint) }
+  if (d3sparql.debug) { console.log(url) }
   var mime = "application/sparql-results+json"
   d3.xhr(url, mime, function(request) {
     var json = request.responseText
-    console.log(json)
+    if (d3sparql.debug) { console.log(json) }
     callback(JSON.parse(json))
   })
 /*
   d3.json(url, function(error, json) {
-    console.log(error)
-    console.log(json)
+    if (d3sparql.debug) { console.log(error) }
+    if (d3sparql.debug) { console.log(json) }
     callback(json)
   })
 */
@@ -124,7 +125,7 @@ d3sparql.graph = function(json, config) {
     }
     graph.links.push({"source": check.get(key1), "target": check.get(key2)})
   }
-  console.log(JSON.stringify(graph))
+  if (d3sparql.debug) { console.log(JSON.stringify(graph)) }
   return graph
 }
 
@@ -201,7 +202,7 @@ d3sparql.tree = function(json, config) {
   }
   var tree = traverse(root)
 
-  console.log(JSON.stringify(tree))
+  if (d3sparql.debug) { console.log(JSON.stringify(tree)) }
   return tree
 }
 

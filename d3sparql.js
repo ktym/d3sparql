@@ -7,7 +7,7 @@
 //
 
 var d3sparql = {
-  version: "d3sparql.js version 2015-02-04"
+  version: "d3sparql.js version 2015-05-20",
 }
 
 /*
@@ -124,6 +124,7 @@ d3sparql.graph = function(json, config) {
     }
     graph.links.push({"source": check.get(key1), "target": check.get(key2)})
   }
+  console.log(JSON.stringify(graph))
   return graph
 }
 
@@ -133,9 +134,10 @@ d3sparql.graph = function(json, config) {
 
   Options:
     config = {
-      "root": "value for root node",
+      "root": "SPARQL variable name for root node",
       "parent": "SPARQL variable name for parent node",
       "child": "SPARQL variable name for child node",
+      "size": "SPARQL variable name for numerical value of the child node"
     }
 
   Synopsis:
@@ -157,36 +159,50 @@ d3sparql.tree = function(json, config) {
     "root":   config.root   || head[0],
     "parent": config.parent || head[1],
     "child":  config.child  || head[2],
+    "size":   config.size   || head[3] || "size",
   }
 
-  var tree = d3.map()
-  var parent = child = children = true
+  var pair = d3.map()
+  var size = d3.map()
   var root = data[0][opts.root].value
+  var parent = child = children = true
   for (var i = 0; i < data.length; i++) {
     parent = data[i][opts.parent].value
     child = data[i][opts.child].value
     if (parent != child) {
-      if (tree.has(parent)) {
-        children = tree.get(parent)
+      if (pair.has(parent)) {
+        children = pair.get(parent)
         children.push(child)
-        tree.set(parent, children)
+        pair.set(parent, children)
+        if (data[i][opts.size]) {
+          size.set(child, data[i][opts.size].value)
+        }
       } else {
         children = [child]
-        tree.set(parent, children)
+        pair.set(parent, children)
+        if (data[i][opts.size]) {
+          size.set(child, data[i][opts.size].value)
+        }
       }
     }
   }
   function traverse(node) {
-    var list = tree.get(node)
+    var list = pair.get(node)
     if (list) {
       var children = list.map(function(d) {return traverse(d)})
+      // sum of values of children
       var subtotal = d3.sum(children, function(d) {return d.size})
-      return {"name": node, "children": children, "size": subtotal}
+      // add a value of parent if exists
+      var total = d3.sum([subtotal, size.get(node)])
+      return {"name": node, "children": children, "size": total}
     } else {
-      return {"name": node, "size": 1}
+      return {"name": node, "size": size.get(node) || 1}
     }
   }
-  return traverse(root)
+  var tree = traverse(root)
+
+  console.log(JSON.stringify(tree))
+  return tree
 }
 
 /*
@@ -731,7 +747,6 @@ d3sparql.scatterplot = function(json, config) {
 */
 d3sparql.forcegraph = function(json, config) {
   var graph = d3sparql.graph(json, config)
-  //console.log(JSON.stringify(graph))
 
   var opts = {
     "radius":    config.radius    || function(d) {return 1 + d.label.length},
@@ -852,9 +867,9 @@ d3sparql.sankey = function(json, config) {
   var graph = d3sparql.graph(json, config)
 
   var opts = {
-    "width":    config.width  	|| 750,
-    "height":   config.height 	|| 1200,
-    "margin":   config.margin 	|| 10,
+    "width":    config.width    || 750,
+    "height":   config.height   || 1200,
+    "margin":   config.margin   || 10,
     "selector": config.selector || "#result"
   }
 
@@ -971,7 +986,6 @@ d3sparql.sankey = function(json, config) {
 */
 d3sparql.roundtree = function(json, config) {
   var tree = d3sparql.tree(json, config)
-  //console.log(JSON.stringify(tree))
 
   var opts = {
     "diameter":  config.diameter || 800,
@@ -1080,10 +1094,10 @@ d3sparql.dendrogram = function(json, config) {
   var tree = d3sparql.tree(json, config)
 
   var opts = {
-    "width":    config.width  	|| 800,
-    "height":   config.height 	|| 5000,
-    "margin":   config.margin 	|| 350,
-    "radius":   config.radius 	|| 5,
+    "width":    config.width    || 800,
+    "height":   config.height   || 5000,
+    "margin":   config.margin   || 350,
+    "radius":   config.radius   || 5,
     "selector": config.selector || "#result"
   }
 
@@ -1176,9 +1190,9 @@ d3sparql.sunburst = function(json, config) {
   var tree = d3sparql.tree(json, config)
 
   var opts = {
-    "width":    config.width  	|| 1000,
-    "height":   config.height 	|| 900,
-    "margin":   config.margin 	|| 150,
+    "width":    config.width    || 1000,
+    "height":   config.height   || 900,
+    "margin":   config.margin   || 150,
     "selector": config.selector || "#result"
   }
 
@@ -1818,7 +1832,6 @@ d3sparql.namedmap = function(json, config) {
             return parseInt(d.size.value)
           })
         }).map(data, d3.map)
-  console.log(size)
   var extent = d3.extent((d3.map(size).values()))
 
   var svg = d3.select(opts.selector).html("").append("svg")
@@ -1883,3 +1896,7 @@ d3sparql.toggle = function() {
     button.attr("class", "icon-chevron-down")
   }
 }
+
+/* for Node.js */
+//module.exports = d3sparql
+

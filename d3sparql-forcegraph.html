@@ -13,13 +13,6 @@
     }
     function render(json) {
       var config = {
-        // for d3sparql.graph()
-        "key1": "taxid1",
-        "key2": "taxid2",
-        "label1": "name1",
-        "label2": "name2",
-        // for d3sparql.forcegraph()
-        "radius": function(d) {return 1 + d.label.length},
         "charge": -500,
         "distance": 50,
         "width": 1000,
@@ -30,7 +23,7 @@
     }
 
     function exec_offline() {
-      d3.json("cache/taxonomy/58669.json", render)
+      d3.json("cache/dbpedia/proglang_pair.json", render)
     }
     function toggle() {
       d3sparql.toggle()
@@ -43,26 +36,43 @@
       <form class="form-inline">
         <label>SPARQL endpoint:</label>
         <div class="input-append">
-          <input id="endpoint" class="span5" value="http://togostanza.org/sparql" type="text">
+          <input id="endpoint" class="span5" value="http://dbpedia.org/sparql" type="text">
           <button class="btn" type="button" onclick="exec()">Query</button>
           <button class="btn" type="button" onclick="exec_offline()">Use cache</button>
           <button class="btn" type="button" onclick="toggle()"><i id="button" class="icon-chevron-up"></i></button>
         </div>
       </form>
       <textarea id="sparql" class="span9" rows=15>
+# https://en.wikipedia.org/wiki/History_of_programming_languages
+# https://en.wikipedia.org/wiki/Perl
+# http://dbpedia.org/page/Perl
+# http://dbpedia.org/sparql
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX up: <http://purl.uniprot.org/core/>
-PREFIX tax: <http://purl.uniprot.org/taxonomy/>
-SELECT ?taxid1 ?taxid2 ?name1 ?name2
-FROM <http://togogenome.org/graph/uniprot/>
-WHERE
-{
-  ?taxon1 rdfs:subClassOf+ tax:58669 .
-  ?taxon1 rdfs:subClassOf ?taxon2 .
-  ?taxon1 up:scientificName ?name1 .
-  ?taxon2 up:scientificName ?name2 .
-  bind (strafter(str(?taxon1), 'taxonomy/') as ?taxid1)
-  bind (strafter(str(?taxon2), 'taxonomy/') as ?taxid2)
+PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>
+PREFIX dbpprop: <http://dbpedia.org/property/>
+PREFIX dbpedia: <http://dbpedia.org/resource/>
+
+SELECT DISTINCT ?lang1 ?lang2 ?lang1label ?lang2label ?lang1value ?lang2value ?lang1year ?lang2year
+WHERE {
+  ?lang1 rdf:type dbpedia-owl:ProgrammingLanguage ;
+         rdfs:label ?lang1name ;
+         dbpprop:year ?lang1year .
+  ?lang2 rdf:type dbpedia-owl:ProgrammingLanguage ;
+         rdfs:label ?lang2name ;
+         dbpprop:year ?lang2year .
+  ?lang1 dbpedia-owl:influenced ?lang2 .
+  FILTER (?lang1 != ?lang2)
+  FILTER (LANG(?lang1name) = 'en')
+  FILTER (LANG(?lang2name) = 'en')
+  BIND (replace(?lang1name, " .programming language.", "") AS ?lang1label)
+  BIND (replace(?lang2name, " .programming language.", "") AS ?lang2label)
+  FILTER (?lang1year > 1950 AND ?lang1year < 2020)
+  FILTER (?lang2year > 1950 AND ?lang2year < 2020)
+  # To render older language larger than newer
+  BIND ((2020 - ?lang1year) AS ?lang1value)
+  BIND ((2020 - ?lang2year) AS ?lang2value)
 }
       </textarea>
     </div>

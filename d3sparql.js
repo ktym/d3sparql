@@ -78,6 +78,8 @@ d3sparql.query = function(endpoint, sparql, callback) {
       "key2":   "SPARQL variable name for node2",
       "label1": "SPARQL variable name for the label of node1",  // optional
       "label2": "SPARQL variable name for the label of node2",  // optional
+      "value1": "SPARQL variable name for the value of node1",  // optional
+      "value2": "SPARQL variable name for the value of node2",  // optional
     }
 
   Synopsis:
@@ -88,9 +90,6 @@ d3sparql.query = function(endpoint, sparql, callback) {
       d3sparql.forcegraph(json, config)
       d3sparql.sankey(json, config)
     }
-
-  TODO:
-    Should nodes hold value (in what key name)?
 */
 d3sparql.graph = function(json, config) {
   var head = json.head.vars
@@ -101,6 +100,8 @@ d3sparql.graph = function(json, config) {
     "key2":   config.key2   || head[1] || "key2",
     "label1": config.label1 || head[2] || false,  // optional
     "label2": config.label2 || head[3] || false,  // optional
+    "value1": config.value1 || head[4] || false,  // optional
+    "value2": config.value2 || head[5] || false,  // optional
   }
   var graph = {
     "nodes": [],
@@ -113,13 +114,15 @@ d3sparql.graph = function(json, config) {
     var key2 = data[i][opts.key2].value
     var label1 = opts.label1 ? data[i][opts.label1].value : key1
     var label2 = opts.label2 ? data[i][opts.label2].value : key2
+    var value1 = opts.value1 ? data[i][opts.value1].value : false
+    var value2 = opts.value2 ? data[i][opts.value2].value : false
     if (!check.has(key1)) {
-      graph.nodes.push({"key": key1, "label": label1})
+      graph.nodes.push({"key": key1, "label": label1, "value": value1})
       check.set(key1, index)
       index++
     }
     if (!check.has(key2)) {
-      graph.nodes.push({"key": key2, "label": label2})
+      graph.nodes.push({"key": key2, "label": label2, "value": value2})
       check.set(key2, index)
       index++
     }
@@ -707,12 +710,12 @@ d3sparql.scatterplot = function(json, config) {
 
   Options:
     config = {
-      "radius": 12,    // radius value or a function
-      "charge": -250,  // force between nodes (negative: repulsion, positive: attraction)
-      "distance": 30,  // target distance between linked nodes
-      "width": 1000,   // canvas width
-      "height": 500,   // canvas height
-      "label": "name", // name of a JSON key to be used as a label text for the node (optional)
+      "radius": 12,      // static value or a function to calculate radius of nodes
+      "charge": -250,    // force between nodes (negative: repulsion, positive: attraction)
+      "distance": 30,    // target distance between linked nodes
+      "width": 1000,     // canvas width
+      "height": 500,     // canvas height
+      "label": "name",   // SPARQL variable name for node labels (optional)
       "selector": "#result"
     }
 
@@ -749,8 +752,12 @@ d3sparql.scatterplot = function(json, config) {
 d3sparql.forcegraph = function(json, config) {
   var graph = d3sparql.graph(json, config)
 
+  var scale = d3.scale.linear()
+    .domain(d3.extent(graph.nodes, function(d) {return parseFloat(d.value)}))
+    .range([1, 20])
+
   var opts = {
-    "radius":    config.radius    || function(d) {return 1 + d.label.length},
+    "radius":    config.radius    || function(d) {return d.value ? scale(d.value) : 1 + d.label.length },
     "charge":    config.charge    || -500,
     "distance":  config.distance  || 50,
     "width":     config.width     || 1000,

@@ -90,6 +90,9 @@ d3sparql.query = function(endpoint, sparql, callback) {
       d3sparql.forcegraph(json, config)
       d3sparql.sankey(json, config)
     }
+
+  TODO:
+    Should follow the convention in the miserables.json https://gist.github.com/mbostock/4062045 to contain group for nodes and value for edges.
 */
 d3sparql.graph = function(json, config) {
   var head = json.head.vars
@@ -133,15 +136,21 @@ d3sparql.graph = function(json, config) {
 }
 
 /*
-  Convert sparql-results+json object into a JSON graph in the {"name": name, "size": size, "children": []} form.
-  Suitable for d3.layout.hierarchy() family cluster (dendrogram), pack (circlepack), partition (sunburst), tree (roundtree), treemap (treemap)
+  Convert sparql-results+json object into a JSON tree of {"name": name, "value": size, "children": []} format like in the flare.json file.
+
+  Suitable for d3.layout.hierarchy() family
+    * cluster:    d3sparql.dendrogram()
+    * pack:       d3sparql.circlepack()
+    * partition:  d3sparql.sunburst()
+    * tree:       d3sparql.roundtree()
+    * treemap:    d3sparql.treemap()
 
   Options:
     config = {
       "root": "SPARQL variable name for root node",
       "parent": "SPARQL variable name for parent node",
       "child": "SPARQL variable name for child node",
-      "size": "SPARQL variable name for numerical value of the child node"
+      "value": "SPARQL variable name for numerical value of the child node"
     }
 
   Synopsis:
@@ -163,7 +172,7 @@ d3sparql.tree = function(json, config) {
     "root":   config.root   || head[0],
     "parent": config.parent || head[1],
     "child":  config.child  || head[2],
-    "size":   config.size   || head[3] || "size",
+    "value":  config.value  || head[3] || "value",
   }
 
   var pair = d3.map()
@@ -178,14 +187,14 @@ d3sparql.tree = function(json, config) {
         children = pair.get(parent)
         children.push(child)
         pair.set(parent, children)
-        if (data[i][opts.size]) {
-          size.set(child, data[i][opts.size].value)
+        if (data[i][opts.value]) {
+          size.set(child, data[i][opts.value].value)
         }
       } else {
         children = [child]
         pair.set(parent, children)
-        if (data[i][opts.size]) {
-          size.set(child, data[i][opts.size].value)
+        if (data[i][opts.value]) {
+          size.set(child, data[i][opts.value].value)
         }
       }
     }
@@ -195,12 +204,12 @@ d3sparql.tree = function(json, config) {
     if (list) {
       var children = list.map(function(d) {return traverse(d)})
       // sum of values of children
-      var subtotal = d3.sum(children, function(d) {return d.size})
+      var subtotal = d3.sum(children, function(d) {return d.value})
       // add a value of parent if exists
       var total = d3.sum([subtotal, size.get(node)])
-      return {"name": node, "children": children, "size": total}
+      return {"name": node, "children": children, "value": total}
     } else {
-      return {"name": node, "size": size.get(node) || 1}
+      return {"name": node, "value": size.get(node) || 1}
     }
   }
   var tree = traverse(root)
@@ -1219,7 +1228,7 @@ d3sparql.sunburst = function(json, config) {
     .innerRadius(function(d) { return Math.max(0, y(d.y)) })
     .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)) })
   var partition = d3.layout.partition()
-    .value(function(d) {return d.size})
+    .value(function(d) {return d.value})
   var nodes = partition.nodes(tree)
   var path = svg.selectAll("path")
     .data(nodes)
@@ -1446,10 +1455,9 @@ d3sparql.circlepack = function(json, config) {
 
   Options:
     config = {
-      "width": 900,    // canvas width
-      "height": 4500,  // canvas height
+      "width": 800,    // canvas width
+      "height": 500,   // canvas height
       "margin": 10,    // margin around the treemap
-      "radius": 5,     // radius of node circles
       "selector": "#result"
     }
 
@@ -1526,56 +1534,103 @@ d3sparql.treemap = function(json, config) {
   }
 }
 
-/* TODO */
+/*
+  Rendering sparql-results+json object into a zoomable treemap
+
+  References:
+    http://bost.ocks.org/mike/treemap/  Zoomable Treemaps
+    http://bl.ocks.org/zanarmstrong/76d263bd36f312cb0f9f
+    https://secure.polisci.ohio-state.edu/faq/d3/zoomabletreemap_code.php
+
+    http://codepen.io/boars/pen/JjILy
+    http://www.billdwhite.com/wordpress/2012/12/16/d3-treemap-with-title-headers/
+    http://mbostock.github.io/d3/talk/20111018/treemap.html
+
+  Options:
+    config = {
+      "width": 800,    // canvas width
+      "height": 500,   // canvas height
+      "margin": 10,    // margin around the treemap
+      "selector": "#result"
+    }
+
+  Synopsis:
+    d3sparql.query(endpoint, sparql, render)
+
+    function render(json) {
+      var config = { ... }
+      d3sparql.treemapzoom(json, config)
+    }
+
+  CSS/SVG:
+    <style>
+    </style>
+*/
 d3sparql.treemapzoom = function(json, config) {
   var tree = d3sparql.tree(json, config)
-  var margin = {top: 20, right: 0, bottom: 0, left: 0},
-    width = 960,
-    height = 500 - margin.top - margin.bottom,
-    formatNumber = d3.format(",d"),
-    transitioning;
+//  d3.select("#json").html(JSON.stringify(tree))
+
+  var opts = {
+    "width":    config.width    || 800,
+    "height":   config.height   || 500,
+    "margin":   config.margin   || {top: 20, right: 0, bottom: 0, left: 0},
+    "selector": config.selector || "#result"
+  }
+
+  var width  = opts.width - opts.margin.left - opts.margin.right
+  var height = opts.height - opts.margin.top - opts.margin.bottom
+
+  var format = d3.format(",d")
+  var transitioning
 
   var x = d3.scale.linear().domain([0, width]).range([0, width])
   var y = d3.scale.linear().domain([0, height]).range([0, height])
 
   var treemap = d3.layout.treemap()
-    .children(function(d, depth) { return depth ? null : d.children; })
-    .sort(function(a, b) { return a.value - b.value; })
+    .children(function(d, depth) { return depth ? null : d.children })
+    .sort(function(a, b) { return a.value - b.value })
     .ratio(height / width * 0.5 * (1 + Math.sqrt(5)))
-    .round(false);
+    .round(false)
 
-  var svg = d3.select("#chart").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.bottom + margin.top)
-    .style("margin-left", -margin.left + "px")
-    .style("margin.right", -margin.right + "px")
+  var svg = d3.select(opts.selector).html("").append("div").append("svg")
+    .attr("width", opts.width)
+    .attr("height", opts.height)
+    .style("margin-left", -opts.margin.left + "px")
+    .style("margin.right", -opts.margin.right + "px")
     .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-    .style("shape-rendering", "crispEdges");
+    .attr("transform", "translate(" + opts.margin.left + "," + opts.margin.top + ")")
+    .style("shape-rendering", "crispEdges")
 
   var grandparent = svg.append("g")
-    .attr("class", "grandparent");
+    .attr("class", "grandparent")
 
   grandparent.append("rect")
-    .attr("y", -margin.top)
+    .attr("y", -opts.margin.top)
     .attr("width", width)
-    .attr("height", margin.top);
+    .attr("height", opts.margin.top)
 
   grandparent.append("text")
     .attr("x", 6)
-    .attr("y", 6 - margin.top)
-    .attr("dy", ".75em");
+    .attr("y", 6 - opts.margin.top)
+    .attr("dy", ".75em")
 
-  initialize(tree);
-  accumulate(tree);
-  layout(tree);
-  display(tree);
+//d3.json("cache/zoomabletreemap.json.size", function(tree) {
+//d3.json("cache/flare.json", function(tree) {
+//console.log(tree)
+
+  initialize(tree)
+//  accumulate(tree)
+
+d3.select("#json").html(JSON.stringify(tree))
+
+  layout(tree)
+  display(tree)
 
   function initialize(tree) {
-    tree.x = root.y = 0;
-    tree.dx = width;
-    tree.dy = height;
-    tree.depth = 0;
+    tree.x = tree.y = 0
+    tree.dx = width
+    tree.dy = height
+    tree.depth = 0
   }
 
   // Aggregate the values for internal nodes. This is normally done by the
@@ -1595,15 +1650,15 @@ d3sparql.treemapzoom = function(json, config) {
   // coordinates. This lets us use a viewport to zoom.
   function layout(d) {
     if (d.children) {
-      treemap.nodes({children: d.children});
+      treemap.nodes({children: d.children})
       d.children.forEach(function(c) {
-        c.x = d.x + c.x * d.dx;
-        c.y = d.y + c.y * d.dy;
-        c.dx *= d.dx;
-        c.dy *= d.dy;
-        c.parent = d;
-        layout(c);
-      });
+        c.x = d.x + c.x * d.dx
+        c.y = d.y + c.y * d.dy
+        c.dx *= d.dx
+        c.dy *= d.dy
+        c.parent = d
+        layout(c)
+      })
     }
   }
 
@@ -1612,92 +1667,290 @@ d3sparql.treemapzoom = function(json, config) {
       .datum(d.parent)
       .on("click", transition)
       .select("text")
-      .text(name(d));
+      .text(name(d))
 
     var g1 = svg.insert("g", ".grandparent")
       .datum(d)
-      .attr("class", "depth");
+      .attr("class", "depth")
 
     var g = g1.selectAll("g")
       .data(d.children)
       .enter()
-      .append("g");
+      .append("g")
 
-    g.filter(function(d) { return d.children; })
+    g.filter(function(d) { return d.children })
       .classed("children", true)
-      .on("click", transition);
+      .on("click", transition)
 
     g.selectAll(".child")
-      .data(function(d) { return d.children || [d]; })
+      .data(function(d) { return d.children || [d] })
       .enter()
       .append("rect")
       .attr("class", "child")
-      .call(rect);
+      .call(rect)
 
     g.append("rect")
       .attr("class", "parent")
       .call(rect)
       .append("title")
-      .text(function(d) { return formatNumber(d.value); });
+      .text(function(d) { return format(d.value) })
 
     g.append("text")
       .attr("dy", ".75em")
-      .text(function(d) { return d.name; })
-      .call(text);
+      .text(function(d) { return d.name })
+      .call(text)
 
     function transition(d) {
-      if (transitioning || !d) return;
-      transitioning = true;
+      if (transitioning || !d) return
+      transitioning = true
       var g2 = display(d),
           t1 = g1.transition().duration(750),
-          t2 = g2.transition().duration(750);
+          t2 = g2.transition().duration(750)
 
       // Update the domain only after entering new elements.
-      x.domain([d.x, d.x + d.dx]);
-      y.domain([d.y, d.y + d.dy]);
+      x.domain([d.x, d.x + d.dx])
+      y.domain([d.y, d.y + d.dy])
 
       // Enable anti-aliasing during the transition.
-      svg.style("shape-rendering", null);
+      svg.style("shape-rendering", null)
 
       // Draw child nodes on top of parent nodes.
-      svg.selectAll(".depth").sort(function(a, b) { return a.depth - b.depth; });
+      svg.selectAll(".depth").sort(function(a, b) { return a.depth - b.depth })
 
       // Fade-in entering text.
-      g2.selectAll("text").style("fill-opacity", 0);
+      g2.selectAll("text").style("fill-opacity", 0)
 
       // Transition to the new view.
-      t1.selectAll("text").call(text).style("fill-opacity", 0);
-      t2.selectAll("text").call(text).style("fill-opacity", 1);
-      t1.selectAll("rect").call(rect);
-      t2.selectAll("rect").call(rect);
+      t1.selectAll("text").call(text).style("fill-opacity", 0)
+      t2.selectAll("text").call(text).style("fill-opacity", 1)
+      t1.selectAll("rect").call(rect)
+      t2.selectAll("rect").call(rect)
 
       // Remove the old node when the transition is finished.
       t1.remove().each("end", function() {
-        svg.style("shape-rendering", "crispEdges");
-        transitioning = false;
-      });
+        svg.style("shape-rendering", "crispEdges")
+        transitioning = false
+      })
     }
 
-    return g;
+    return g
   }
 
   function text(text) {
-    text.attr("x", function(d) { return x(d.x) + 6; })
-        .attr("y", function(d) { return y(d.y) + 6; });
+    text.attr("x", function(d) { return x(d.x) + 6 })
+        .attr("y", function(d) { return y(d.y) + 6 })
   }
 
   function rect(rect) {
-    rect.attr("x", function(d) { return x(d.x); })
-        .attr("y", function(d) { return y(d.y); })
-        .attr("width", function(d) { return x(d.x + d.dx) - x(d.x); })
-        .attr("height", function(d) { return y(d.y + d.dy) - y(d.y); });
+    rect.attr("x", function(d) { return x(d.x) })
+        .attr("y", function(d) { return y(d.y) })
+        .attr("width", function(d) { return x(d.x + d.dx) - x(d.x) })
+        .attr("height", function(d) { return y(d.y + d.dy) - y(d.y) })
   }
 
   function name(d) {
     return d.parent
         ? name(d.parent) + "." + d.name
-        : d.name;
+        : d.name
   }
+
+//}) // d3.json
+
+}
+
+/* backup */
+d3sparql.treemapzoomback = function(json, config) {
+//  var tree = d3sparql.tree(json, config)
+//  d3.select("#json").html(JSON.stringify(tree))
+
+  var opts = {
+    "width":    config.width    || 800,
+    "height":   config.height   || 500,
+    "margin":   config.margin   || {top: 20, right: 0, bottom: 0, left: 0},
+    "selector": config.selector || "#result"
+  }
+
+  var width  = opts.width - opts.margin.left - opts.margin.right
+  var height = opts.height - opts.margin.top - opts.margin.bottom
+
+  var formatNumber = d3.format(",d")
+  var transitioning
+
+  var x = d3.scale.linear().domain([0, width]).range([0, width])
+  var y = d3.scale.linear().domain([0, height]).range([0, height])
+
+  var treemap = d3.layout.treemap()
+    .children(function(d, depth) { return depth ? null : d._children })
+    .sort(function(a, b) { return a.value - b.value })
+    .ratio(height / width * 0.5 * (1 + Math.sqrt(5)))
+    .round(false)
+
+  var svg = d3.select(opts.selector).html("").append("div").append("svg")
+    .attr("width", opts.width)
+    .attr("height", opts.height)
+    .style("margin-left", -opts.margin.left + "px")
+    .style("margin.right", -opts.margin.right + "px")
+    .append("g")
+    .attr("transform", "translate(" + opts.margin.left + "," + opts.margin.top + ")")
+    .style("shape-rendering", "crispEdges")
+
+  var grandparent = svg.append("g")
+    .attr("class", "grandparent")
+
+  grandparent.append("rect")
+    .attr("y", -opts.margin.top)
+    .attr("width", width)
+    .attr("height", opts.margin.top)
+
+  grandparent.append("text")
+    .attr("x", 6)
+    .attr("y", 6 - opts.margin.top)
+    .attr("dy", ".75em")
+
+//d3.json("cache/zoomabletreemap.json.size", function(tree) {
+d3.json("cache/flare.json", function(tree) {
+console.log(tree)
+
+  initialize(tree)
+  accumulate(tree)
+
+d3.select("#json").html(JSON.stringify(tree))
+
+  layout(tree)
+  display(tree)
+
+  function initialize(tree) {
+    tree.x = tree.y = 0
+    tree.dx = width
+    tree.dy = height
+    tree.depth = 0
+  }
+
+  // Aggregate the values for internal nodes. This is normally done by the
+  // treemap layout, but not here because of our custom implementation.
+  // We also take a snapshot of the original children (_children) to avoid
+  // the children being overwritten when when layout is computed.
+  function accumulate(d) {
+    return (d._children = d.children)
+        ? d.value = d.children.reduce(function(p, v) { return p + accumulate(v); }, 0)
+        : d.value;
+  }
+
+  // Compute the treemap layout recursively such that each group of siblings
+  // uses the same size (1×1) rather than the dimensions of the parent cell.
+  // This optimizes the layout for the current zoom state. Note that a wrapper
+  // object is created for the parent node for each group of siblings so that
+  // the parent’s dimensions are not discarded as we recurse. Since each group
+  // of sibling was laid out in 1×1, we must rescale to fit using absolute
+  // coordinates. This lets us use a viewport to zoom.
+  function layout(d) {
+    if (d._children) {
+      treemap.nodes({_children: d._children})
+      d._children.forEach(function(c) {
+        c.x = d.x + c.x * d.dx
+        c.y = d.y + c.y * d.dy
+        c.dx *= d.dx
+        c.dy *= d.dy
+        c.parent = d
+        layout(c)
+      })
+    }
+  }
+
+  function display(d) {
+    grandparent
+      .datum(d.parent)
+      .on("click", transition)
+      .select("text")
+      .text(name(d))
+
+    var g1 = svg.insert("g", ".grandparent")
+      .datum(d)
+      .attr("class", "depth")
+
+    var g = g1.selectAll("g")
+      .data(d._children)
+      .enter()
+      .append("g")
+
+    g.filter(function(d) { return d._children })
+      .classed("children", true)
+      .on("click", transition)
+
+    g.selectAll(".child")
+      .data(function(d) { return d._children || [d] })
+      .enter()
+      .append("rect")
+      .attr("class", "child")
+      .call(rect)
+
+    g.append("rect")
+      .attr("class", "parent")
+      .call(rect)
+      .append("title")
+      .text(function(d) { return formatNumber(d.value) })
+
+    g.append("text")
+      .attr("dy", ".75em")
+      .text(function(d) { return d.name })
+      .call(text)
+
+    function transition(d) {
+      if (transitioning || !d) return
+      transitioning = true
+      var g2 = display(d),
+          t1 = g1.transition().duration(750),
+          t2 = g2.transition().duration(750)
+
+      // Update the domain only after entering new elements.
+      x.domain([d.x, d.x + d.dx])
+      y.domain([d.y, d.y + d.dy])
+
+      // Enable anti-aliasing during the transition.
+      svg.style("shape-rendering", null)
+
+      // Draw child nodes on top of parent nodes.
+      svg.selectAll(".depth").sort(function(a, b) { return a.depth - b.depth })
+
+      // Fade-in entering text.
+      g2.selectAll("text").style("fill-opacity", 0)
+
+      // Transition to the new view.
+      t1.selectAll("text").call(text).style("fill-opacity", 0)
+      t2.selectAll("text").call(text).style("fill-opacity", 1)
+      t1.selectAll("rect").call(rect)
+      t2.selectAll("rect").call(rect)
+
+      // Remove the old node when the transition is finished.
+      t1.remove().each("end", function() {
+        svg.style("shape-rendering", "crispEdges")
+        transitioning = false
+      })
+    }
+
+    return g
+  }
+
+  function text(text) {
+    text.attr("x", function(d) { return x(d.x) + 6 })
+        .attr("y", function(d) { return y(d.y) + 6 })
+  }
+
+  function rect(rect) {
+    rect.attr("x", function(d) { return x(d.x) })
+        .attr("y", function(d) { return y(d.y) })
+        .attr("width", function(d) { return x(d.x + d.dx) - x(d.x) })
+        .attr("height", function(d) { return y(d.y + d.dy) - y(d.y) })
+  }
+
+  function name(d) {
+    return d.parent
+        ? name(d.parent) + "." + d.name
+        : d.name
+  }
+
+}) // d3.json
+
 }
 
 /*
@@ -1907,4 +2160,3 @@ d3sparql.toggle = function() {
 
 /* for Node.js */
 //module.exports = d3sparql
-

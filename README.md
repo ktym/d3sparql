@@ -96,5 +96,6 @@ See details at https://github.com/ktym/d3sparql/commits/master/d3sparql.js
   * merged a pull request to insert visualization at the specified DOM ID instead of appending to the body
 * 2015-02-04 Improved to customize the target DOM ID
 * 2015-02-06 Changed to clear the DOM contents before appending elements to update the visualization
-
+* 2015-05-21 Updated d3sparql.tree() and .graph() to keep values associated to nodes which are reflected in treemap(), sunburst() and forcegraph() visualizations
+* 2015-05-21 Debug mode is introduced. Assign d3sparql.debug = true at anytime to enable verbose console log
 

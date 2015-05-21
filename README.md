@@ -83,19 +83,20 @@ See details at https://github.com/ktym/d3sparql/commits/master/d3sparql.js
 
 * 2013-01-28 Project started
 * 2014-07-03 Made publicly available at GitHub
-* 2014-07-14 Added bar/line charts with scales
+* 2014-07-14 Added bar/line charts ```barchart()``` with scales
 * 2014-07-17 Added default SVG attributes equivalent to CSS styles
   * Visualizations look good without CSS by default (user can customize style by CSS)
   * Added descriptions to each visualization function
-* 2014-07-19 Introduced d3sparql name space
-* 2014-07-20 Added Pie, Doughnut and Sankey diagram
-* 2014-11-13 Merged a pull request to visualize a coordination based map
+* 2014-07-19 Introduced ```d3sparql``` name space
+* 2014-07-20 Added Pie, Doughnut ```piechart()```, Sankey diagram ```sankey()``` and a name based map ```namedmap()```
+* 2014-11-13 Merged a pull request to visualize a coordination based map ```coordmap()```
 * 2014-12-11 Updated to set default values in options
 * 2015-02-03 Added README file
   * updated namedmap to use an option for scale
   * merged a pull request to insert visualization at the specified DOM ID instead of appending to the body
 * 2015-02-04 Improved to customize the target DOM ID
 * 2015-02-06 Changed to clear the DOM contents before appending elements to update the visualization
-* 2015-05-21 Updated d3sparql.tree() and .graph() to keep values associated to nodes which are reflected in treemap(), sunburst() and forcegraph() visualizations
-* 2015-05-21 Debug mode is introduced. Assign d3sparql.debug = true at anytime to enable verbose console log
-
+* 2015-05-21 Updated ```tree()``` and ```graph()``` to keep values associated to nodes
+  * Values are reflected in the ```treemap()```, ```sunburst()``` and ```forcegraph()``` visualizations
+* 2015-05-21 Debug mode is introduced
+  * Assign ```d3sparql.debug = true``` at anytime to enable verbose console log

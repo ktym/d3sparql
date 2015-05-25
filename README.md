@@ -38,7 +38,7 @@ Semantic Web technologies are getting widely used in information sciences along 
     d3sparql.query(endpoint, sparql, render)
   }
   function render(json) {
-    /* set options and call the d3xxxxx function in this library ... */
+    /* set options and call the d3spraql.xxxxx function in this library ... */
     var config = {
 	  "selector": "#result"
 	}

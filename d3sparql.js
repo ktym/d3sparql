@@ -7,7 +7,7 @@
 //
 
 var d3sparql = {
-  version: "d3sparql.js version 2015-05-21",
+  version: "d3sparql.js version 2015-05-25",
   debug: false  // set to true for showing debug information
 }
 

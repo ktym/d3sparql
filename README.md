@@ -38,7 +38,7 @@ Semantic Web technologies are being widely applied in life sciences. Major bioin
     d3sparql.query(endpoint, sparql, render)
   }
   function render(json) {
-    // set options and call the d3xxxxx function in this library ...
+    /* set options and call the d3xxxxx function in this library ... */
     var config = {
 	  "selector": "#result"
 	}

@@ -100,3 +100,6 @@ See details at https://github.com/ktym/d3sparql/commits/master/d3sparql.js
   * Values are reflected in the ```treemap()```, ```sunburst()``` and ```forcegraph()``` visualizations
 * 2015-05-21 Debug mode is introduced
   * Assign ```d3sparql.debug = true``` at anytime to enable verbose console log
+* 2015-05-25 Incorporated ```treemapzoom()``` useful to dig into a nested tree (in which each leaf may have a value)
+
+

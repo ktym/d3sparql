@@ -1540,17 +1540,11 @@ d3sparql.treemap = function(json, config) {
   References:
     http://bost.ocks.org/mike/treemap/  Zoomable Treemaps
     http://bl.ocks.org/zanarmstrong/76d263bd36f312cb0f9f
-    https://secure.polisci.ohio-state.edu/faq/d3/zoomabletreemap_code.php
-
-    http://codepen.io/boars/pen/JjILy
-    http://www.billdwhite.com/wordpress/2012/12/16/d3-treemap-with-title-headers/
-    http://mbostock.github.io/d3/talk/20111018/treemap.html
 
   Options:
     config = {
       "width": 800,    // canvas width
       "height": 500,   // canvas height
-      "margin": 10,    // margin around the treemap
       "selector": "#result"
     }
 
@@ -1564,51 +1558,15 @@ d3sparql.treemap = function(json, config) {
 
   CSS/SVG:
     <style>
-#result {
-  width: 960px;
-  height: 500px;
-  background: #ddd;
-}
-
-text {
-  pointer-events: none;
-}
-
-.grandparent text {
-  font-weight: bold;
-}
-
-rect {
-  fill: none;
-  stroke: #fff;
-}
-
-rect.parent,
-.grandparent rect {
-  stroke-width: 2px;
-}
-
-.grandparent rect {
-  fill: orange;
-}
-
-.grandparent:hover rect {
-  fill: #ee9700;
-}
-
-.children rect.parent,
-.grandparent rect {
-  cursor: pointer;
-}
-
-.children rect.parent {
-  fill: #bbb;
-  fill-opacity: .5;
-}
-
-.children:hover rect.child {
-  fill: #bbb;
-}
+    rect {
+      cursor: pointer;
+    }
+    .grandparent:hover rect {
+      opacity: 0.8;
+    }
+    .children:hover rect.child {
+      opacity: 0.2;
+    }
     </style>
 */
 d3sparql.treemapzoom = function(json, config) {
@@ -1617,13 +1575,13 @@ d3sparql.treemapzoom = function(json, config) {
   var opts = {
     "width":    config.width    || 800,
     "height":   config.height   || 500,
-    "margin":   config.margin   || {top: 20, right: 0, bottom: 0, left: 0},
+    "margin":   config.margin   || {top: 25, right: 0, bottom: 0, left: 0},
     "selector": config.selector || "#result"
   }
 
   var width  = opts.width - opts.margin.left - opts.margin.right
   var height = opts.height - opts.margin.top - opts.margin.bottom
-
+  var color = d3.scale.category20()
   var format = d3.format(",d")
   var transitioning
 
@@ -1636,7 +1594,7 @@ d3sparql.treemapzoom = function(json, config) {
     .ratio(height / width * 0.5 * (1 + Math.sqrt(5)))
     .round(false)
 
-  var svg = d3.select(opts.selector).html("").append("div").append("svg")
+  var svg = d3.select(opts.selector).html("").append("svg")
     .attr("width", opts.width)
     .attr("height", opts.height)
     .style("margin-left", -opts.margin.left + "px")
@@ -1652,11 +1610,14 @@ d3sparql.treemapzoom = function(json, config) {
     .attr("y", -opts.margin.top)
     .attr("width", width)
     .attr("height", opts.margin.top)
+    .attr("fill", "#666")
 
   grandparent.append("text")
     .attr("x", 6)
     .attr("y", 6 - opts.margin.top)
     .attr("dy", ".75em")
+    .attr("stroke", "#fff")
+    .attr("fill", "#fff")
 
   initialize(tree)
   layout(tree)
@@ -1760,7 +1721,6 @@ d3sparql.treemapzoom = function(json, config) {
         transitioning = false
       })
     }
-
     return g
   }
 
@@ -1774,11 +1734,17 @@ d3sparql.treemapzoom = function(json, config) {
         .attr("y", function(d) { return y(d.y) })
         .attr("width", function(d) { return x(d.x + d.dx) - x(d.x) })
         .attr("height", function(d) { return y(d.y + d.dy) - y(d.y) })
+        .attr("fill", function(d) { return color(d.name) })
+    rect.attr({
+      "stroke": "#fff",
+      "stroke-width": "1px",
+      "opacity": 0.8,
+    })
   }
 
   function name(d) {
     return d.parent
-        ? name(d.parent) + "." + d.name
+        ? name(d.parent) + " / " + d.name
         : d.name
   }
 }

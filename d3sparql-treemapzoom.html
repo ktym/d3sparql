@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="lib/bootstrap/css/bootstrap.css"/>
+    <script src="lib/d3/d3.v3.min.js"></script>
+    <script src="d3sparql.js"></script>
+    <script>
+    function exec() {
+      d3sparql.debug = true
+      var endpoint = d3.select("#endpoint").property("value")
+      var sparql = d3.select("#sparql").property("value")
+      d3sparql.query(endpoint, sparql, render)
+    }
+    function render(json) {
+      var config = {
+        "width": 1000,
+        "height": 600,
+        "selector": "#result"
+      }
+      d3sparql.treemapzoom(json, config)
+    }
+    function exec_offline() {
+      //d3.json("cache/taxonomy/tardigrada.json", render)
+      d3.json("cache/uniprot/ec1.json", render)
+    }
+    function toggle() {
+      d3sparql.toggle()
+    }
+    </script>
+    <style>
+    text {
+      pointer-events: none;
+    }
+    .children rect.parent,
+    .grandparent rect {
+      cursor: pointer;
+    }
+    .grandparent:hover rect {
+      opacity: 0.8;
+    }
+    .children:hover rect.child {
+      opacity: 0.2;
+    }
+    </style>
+  </head>
+  <body>
+    <div id="query" style="margin: 10px">
+      <h1>d3treemapzoom</h1>
+      <form class="form-inline">
+        <label>SPARQL endpoint:</label>
+        <div class="input-append">
+          <input id="endpoint" class="span5" value="http://togostanza.org/sparql" type="text">
+          <button class="btn" type="button" onclick="exec()">Query</button>
+          <button class="btn" type="button" onclick="exec_offline()">Use cache</button>
+          <button class="btn" type="button" onclick="toggle()"><i id="button" class="icon-chevron-up"></i></button>
+        </div>
+      </form>
+      <textarea id="sparql" class="span9" rows=15>
+# This may take a while to get results
+PREFIX up: <http://purl.uniprot.org/core/>
+PREFIX ec: <http://purl.uniprot.org/enzyme/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+SELECT  (REPLACE(STR(?root), ".*/", "") AS ?root_label)
+        (REPLACE(STR(?parent), ".*/", "") AS ?parent_label)
+        (REPLACE(STR(?enzyme), ".*/", "") AS ?enzyme_label)
+        (COUNT(?protein) AS ?value)
+FROM <http://togogenome.org/graph/uniprot/>
+WHERE
+{
+        VALUES ?root { ec:1.-.-.- }
+        ?root skos:narrowerTransitive* ?enzyme .
+        ?parent skos:narrowerTransitive ?enzyme .
+        ?protein up:enzyme ?enzyme .
+}
+GROUP BY ?root ?parent ?enzyme ORDER BY ?enzyme
+      </textarea>
+    </div>
+    <div id="result"></div>
+    <div id="json"></div>
+  </body>
+</html>

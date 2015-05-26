@@ -1490,18 +1490,28 @@ d3sparql.treemap = function(json, config) {
   var opts = {
     "width":    config.width    || 800,
     "height":   config.height   || 500,
+    "count":    config.count    || false,
+    "color":    config.color    || d3.scale.category20c(),
     "margin":   config.margin   || {top: 0, right: 0, bottom: 0, left: 0},
     "selector": config.selector || null
   }
 
   var width  = opts.width - opts.margin.left - opts.margin.right
   var height = opts.height - opts.margin.top - opts.margin.bottom
-  var color = d3.scale.category20c()
+  var color = opts.color
+
+  function size(d) {
+    return d.value
+  }
+  function count(d) {
+    return 1
+  }
 
   var treemap = d3.layout.treemap()
     .size([width, height])
     .sticky(true)
-    .value(function(d) {return d.value})
+//    .value(function(d) {return d.value})
+    .value(opts.count ? count : size)
 
   var div = d3sparql.select(opts.selector, "treemap")
     .style("position", "relative")

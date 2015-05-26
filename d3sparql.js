@@ -74,12 +74,12 @@ d3sparql.query = function(endpoint, sparql, callback) {
 
   Options:
     config = {
-      "key1":   "SPARQL variable name for node1",
-      "key2":   "SPARQL variable name for node2",
-      "label1": "SPARQL variable name for the label of node1",  // optional
-      "label2": "SPARQL variable name for the label of node2",  // optional
-      "value1": "SPARQL variable name for the value of node1",  // optional
-      "value2": "SPARQL variable name for the value of node2",  // optional
+      "key1":   "node1",       // SPARQL variable name for node1 (optional; default is the 1st variable)
+      "key2":   "node2",       // SPARQL variable name for node2 (optional; default is the 2nd varibale)
+      "label1": "node1label",  // SPARQL variable name for the label of node1 (optional; default is the 3rd variable)
+      "label2": "node2label",  // SPARQL variable name for the label of node2 (optional; default is the 4th variable)
+      "value1": "node1value",  // SPARQL variable name for the value of node1 (optional; default is the 5th variable)
+      "value2": "node2value"   // SPARQL variable name for the value of node2 (optional; default is the 6th variable)
     }
 
   Synopsis:
@@ -101,10 +101,10 @@ d3sparql.graph = function(json, config) {
   var opts = {
     "key1":   config.key1   || head[0] || "key1",
     "key2":   config.key2   || head[1] || "key2",
-    "label1": config.label1 || head[2] || false,  // optional
-    "label2": config.label2 || head[3] || false,  // optional
-    "value1": config.value1 || head[4] || false,  // optional
-    "value2": config.value2 || head[5] || false,  // optional
+    "label1": config.label1 || head[2] || false,
+    "label2": config.label2 || head[3] || false,
+    "value1": config.value1 || head[4] || false,
+    "value2": config.value2 || head[5] || false,
   }
   var graph = {
     "nodes": [],
@@ -143,14 +143,14 @@ d3sparql.graph = function(json, config) {
     * pack:       d3sparql.circlepack()
     * partition:  d3sparql.sunburst()
     * tree:       d3sparql.roundtree()
-    * treemap:    d3sparql.treemap()
+    * treemap:    d3sparql.treemap(), d3sparql.treemapzoom()
 
   Options:
     config = {
-      "root": "SPARQL variable name for root node",
-      "parent": "SPARQL variable name for parent node",
-      "child": "SPARQL variable name for child node",
-      "value": "SPARQL variable name for numerical value of the child node"
+      "root":   "root_name",    // SPARQL variable name for root node (optional; default is the 1st variable)
+      "parent": "parent_name",  // SPARQL variable name for parent node (optional; default is the 2nd variable)
+      "child":  "child_name",   // SPARQL variable name for child node (ptional; default is the 3rd variable)
+      "value":  "value_name"    // SPARQL variable name for numerical value of the child node (optional; default is the 4th variable or "value")
     }
 
   Synopsis:
@@ -162,6 +162,7 @@ d3sparql.graph = function(json, config) {
       d3sparql.dendrogram(json, config)
       d3sparql.sunburst(json, config)
       d3sparql.treemap(json, config)
+      d3sparql.treemapzoom(json, config)
     }
 */
 d3sparql.tree = function(json, config) {
@@ -359,13 +360,13 @@ d3sparql.htmlhash = function(json, config) {
 
   Options:
     config = {
-      "label_x": "Prefecture",
-      "label_y": "Area",
-      "var_x": "pref",
-      "var_y": "area",
-      "width":  850,  // canvas width
-      "height": 300,  // canvas height
-      "margin":  40,  // canvas margin
+      "label_x":  "Prefecture",  // label for x-axis (optional; default is same as var_x)
+      "label_y":  "Area",        // label for y-axis (optional; default is same as var_y)
+      "var_x":    "pref",        // SPARQL variable name for x-axis (optional; default is the 1st variable)
+      "var_y":    "area",        // SPARQL variable name for y-axis (optional; default is the 2nd variable)
+      "width":    850,           // canvas width (optional)
+      "height":   300,           // canvas height (optional)
+      "margin":   40,            // canvas margin (optional)
       "selector": "#result"
     }
 
@@ -497,12 +498,12 @@ d3sparql.barchart = function(json, config) {
 
   Options:
     config = {
-      "label": "pref",
-      "size": "area",
-      "width":  700,
-      "height": 600,
-      "margin":  10,
-      "hole":    50,
+      "label":    "pref",    // SPARQL variable name for slice label (optional; default is the 1st variable)
+      "size":     "area",    // SPARQL variable name for slice value (optional; default is the 2nd variable)
+      "width":    700,       // canvas width (optional)
+      "height":   600,       // canvas height (optional)
+      "margin":   10,        // canvas margin (optional)
+      "hole":     50,        // radius size of a center hole (optional; 0 for pie, r > 0 for doughnut)
       "selector": "#result"
     }
 
@@ -534,7 +535,7 @@ d3sparql.piechart = function(json, config) {
     "width":    config.width    || 700,
     "height":   config.height   || 700,
     "margin":   config.margin   || 10,
-    "hole":     config.hole     || 100, // radius of hole: 0 for pie, r > 0 for doughnut
+    "hole":     config.hole     || 100,
     "selector": config.selector || "#result"
   }
 
@@ -592,17 +593,17 @@ d3sparql.piechart = function(json, config) {
 
   Options:
     config = {
-      "label_x":  "label string for x-axis",
-      "label_y":  "label string for y-axis",
-      "var_x":    "SPARQL variable name for x-axis values",
-      "var_y":    "SPARQL variable name for y-axis values",
-      "var_r":    "SPARQL variable name for radius",
-      "min_r":    1,    // minimum radius size
-      "max_r":    20,   // maximum radius size
-      "width":    850,  // canvas width
-      "height":   300,  // canvas height
-      "margin_x": 80,   // canvas margin x
-      "margin_y": 40,   // canvas margin y
+      "label_x":  "Size",    // label for x-axis (optional; default is same as var_x)
+      "label_y":  "Count",   // label for y-axis (optional; default is same as var_y)
+      "var_x":    "size",    // SPARQL variable name for x-axis values (optional; default is the 1st variable)
+      "var_y":    "count",   // SPARQL variable name for y-axis values (optional; default is the 2nd variable)
+      "var_r":    "volume",  // SPARQL variable name for radius (optional; default is the 3rd variable)
+      "min_r":    1,         // minimum radius size (optional; default is 1)
+      "max_r":    20,        // maximum radius size (optional; default is 20)
+      "width":    850,       // canvas width (optional)
+      "height":   300,       // canvas height (optional)
+      "margin_x": 80,        // canvas margin x (optional)
+      "margin_y": 40,        // canvas margin y (optional)
       "selector": "#result"
     }
 
@@ -632,8 +633,8 @@ d3sparql.scatterplot = function(json, config) {
   var data = json.results.bindings
 
   var opts = {
-    "label_x":  config.label_x  || "label_x",
-    "label_y":  config.label_y  || "label_y",
+    "label_x":  config.label_x  || head[0],
+    "label_y":  config.label_y  || head[1],
     "var_x":    config.var_x    || head[0],
     "var_y":    config.var_y    || head[1],
     "var_r":    config.var_r    || head[2] || 5,
@@ -719,13 +720,14 @@ d3sparql.scatterplot = function(json, config) {
 
   Options:
     config = {
-      "radius": 12,      // static value or a function to calculate radius of nodes
-      "charge": -250,    // force between nodes (negative: repulsion, positive: attraction)
-      "distance": 30,    // target distance between linked nodes
-      "width": 1000,     // canvas width
-      "height": 500,     // canvas height
-      "label": "name",   // SPARQL variable name for node labels (optional)
+      "radius":   12,        // static value or a function to calculate radius of nodes (optional)
+      "charge":   -250,      // force between nodes (optional; negative: repulsion, positive: attraction)
+      "distance": 30,        // target distance between linked nodes (optional)
+      "width":    1000,      // canvas width (optional)
+      "height":   500,       // canvas height (optional)
+      "label":    "name",    // SPARQL variable name for node labels (optional)
       "selector": "#result"
+      // options for d3sparql.graph() can be added here ...
     }
 
   Synopsis:
@@ -771,7 +773,7 @@ d3sparql.forcegraph = function(json, config) {
     "distance":  config.distance  || 50,
     "width":     config.width     || 1000,
     "height":    config.height    || 750,
-    "label":     config.label     || false,  // optional
+    "label":     config.label     || false,
     "selector":  config.selector  || "#result"
   }
 
@@ -837,14 +839,11 @@ d3sparql.forcegraph = function(json, config) {
 
   Options:
     config = {
-      "key1": "parent",
-      "key2": "child",
-      "label1": "parent_label",
-      "label2": "child_label",
-      "width": 1000,
-      "height": 900,
-      "margin":  50,
+      "width":    1000,      // canvas width (optional)
+      "height":   900,       // canvas height (optional)
+      "margin":   50,        // canvas margin (optional)
       "selector": "#result"
+      // options for d3sparql.graph() can be added here ...
     }
 
   Synopsis:
@@ -877,8 +876,9 @@ d3sparql.forcegraph = function(json, config) {
     </style>
 
   Dependencies:
-    Download sankey.js from https://github.com/d3/d3-plugins/tree/master/sankey
-    <script src="sankey.js"></script>
+    * sankey.js
+      * Download from https://github.com/d3/d3-plugins/tree/master/sankey
+      * Put <script src="sankey.js"></script> in the HTML <head> section
 */
 d3sparql.sankey = function(json, config) {
   var graph = d3sparql.graph(json, config)
@@ -967,11 +967,12 @@ d3sparql.sankey = function(json, config) {
 
   Options:
     config = {
-      "diameter": 800,  // diameter of canvas
-      "angle": 360,     // angle of arc (less than 360 for wedge)
-      "depth": 200,     // depth of arc (less than diameter/2 - label length to fit)
-      "radius": 5,      // radius of node circles
+      "diameter": 800,       // canvas diameter (optional)
+      "angle":    360,       // arc angle (optional; less than 360 for wedge)
+      "depth":    200,       // arc depth (optional; less than diameter/2 - label length to fit)
+      "radius":   5,         // node radius (optional)
       "selector": "#result"
+      // options for d3sparql.tree() can be added here ...
     }
 
   Synopsis:
@@ -1060,9 +1061,6 @@ d3sparql.roundtree = function(json, config) {
     "font-size": "10px",
     "font-family": "sans-serif",
   })
-
-  // for IFRAME embed
-  //d3.select(self.frameElement).style("height", opts.diameter * 2 + "px")
 }
 
 /*
@@ -1073,11 +1071,12 @@ d3sparql.roundtree = function(json, config) {
 
   Options:
     config = {
-      "width": 900,    // canvas width
-      "height": 4500,  // canvas height
-      "margin": 300,   // width margin for labels
-      "radius": 5,     // radius of node circles
+      "width":    900,       // canvas width (optional)
+      "height":   4500,      // canvas height (optional)
+      "margin":   300,       // width margin for labels (optional)
+      "radius":   5,         // radius of node circles (optional)
       "selector": "#result"
+      // options for d3sparql.tree() can be added here ...
     }
 
   Synopsis:
@@ -1112,7 +1111,7 @@ d3sparql.dendrogram = function(json, config) {
 
   var opts = {
     "width":    config.width    || 800,
-    "height":   config.height   || 5000,
+    "height":   config.height   || 2000,
     "margin":   config.margin   || 350,
     "radius":   config.radius   || 5,
     "selector": config.selector || "#result"
@@ -1163,9 +1162,6 @@ d3sparql.dendrogram = function(json, config) {
     "font-size": "10px",
     "font-family": "sans-serif",
   })
-
-  // for IFRAME embed
-  //d3.select(self.frameElement).style("height", opts.height + "px")
 }
 
 /*
@@ -1177,10 +1173,11 @@ d3sparql.dendrogram = function(json, config) {
 
   Options:
     config = {
-      "width": 1000,  // canvas width
-      "height": 900,  // canvas height
-      "margin": 150,  // margin for labels
+      "width":    1000,      // canvas width (optional)
+      "height":   900,       // canvas height (optional)
+      "margin":   150,       // margin for labels (optional)
       "selector": "#result"
+      // options for d3sparql.tree() can be added here ...
     }
 
   Synopsis:
@@ -1316,10 +1313,11 @@ d3sparql.sunburst = function(json, config) {
 
   Options:
     config = {
-      "width": 800,     // canvas width
-      "height": 800,    // canvas height
-      "diameter": 700,  // diamieter of the outer circle
+      "width":    800,       // canvas width (optional)
+      "height":   800,       // canvas height (optional)
+      "diameter": 700,       // diamieter of the outer circle (optional)
       "selector": "#result"
+      // options for d3sparql.tree() can be added here ...
     }
 
   Synopsis:
@@ -1455,10 +1453,11 @@ d3sparql.circlepack = function(json, config) {
 
   Options:
     config = {
-      "width": 800,    // canvas width
-      "height": 500,   // canvas height
-      "margin": 10,    // margin around the treemap
+      "width":    800,       // canvas width (optional)
+      "height":   500,       // canvas height (optional)
+      "margin":   10,        // margin around the treemap (optional)
       "selector": "#result"
+      // options for d3sparql.tree() can be added here ...
     }
 
   Synopsis:
@@ -1543,9 +1542,10 @@ d3sparql.treemap = function(json, config) {
 
   Options:
     config = {
-      "width": 800,    // canvas width
-      "height": 500,   // canvas height
+      "width":    800,       // canvas width (optional)
+      "height":   500,       // canvas height (optional)
       "selector": "#result"
+      // options for d3sparql.tree() can be added here ...
     }
 
   Synopsis:
@@ -1576,13 +1576,15 @@ d3sparql.treemapzoom = function(json, config) {
     "width":    config.width    || 800,
     "height":   config.height   || 500,
     "margin":   config.margin   || {top: 25, right: 0, bottom: 0, left: 0},
+    "color":    config.color    || d3.scale.category20(),
+    "format":   config.format   || d3.format(",d"),
     "selector": config.selector || "#result"
   }
 
   var width  = opts.width - opts.margin.left - opts.margin.right
   var height = opts.height - opts.margin.top - opts.margin.bottom
-  var color = d3.scale.category20()
-  var format = d3.format(",d")
+  var color = opts.color
+  var format = opts.format
   var transitioning
 
   var x = d3.scale.linear().domain([0, width]).range([0, width])
@@ -1750,14 +1752,17 @@ d3sparql.treemapzoom = function(json, config) {
 }
 
 /*
-  World Map usable with GeoLocation data (i.e. Longitude and Latitude)
+  World Map spotted by coordinations (longitude and latitude)
 
   Options:
     config = {
-      "radius": 5 // circles radius
-      "color": #FF3333 // circles colors
-      // https://github.com/mbostock/topojson/blob/master/examples/world-50m.json
-      "map": "path/to/world-50m.json",
+      "var_lat":  "lat",     // SPARQL variable name for latitude (optional; default is the 1st variable)
+      "var_lng":  "lng",     // SPARQL variable name for longitude (optional; default is the 2nd variable)
+      "width":    960,       // canvas width (optional)
+      "height":   480,       // canvas height (optional)
+      "radius":   5,         // circle radius (optional)
+      "color":    "#FF3333,  // circle color (optional)
+      "topojson": "path/to/world-50m.json",  // TopoJSON file
       "selector": "#result"
     }
 
@@ -1767,14 +1772,21 @@ d3sparql.treemapzoom = function(json, config) {
     function render(json) {
       d3sparql.coordmap(json, config = {})
     }
+
+  Dependencies:
+    * topojson.js
+      * Download from http://d3js.org/topojson.v1.min.js
+      * Put <script src="topojson.js"></script> in the HTML <head> section
+    * world-50m.json
+      * Download from https://github.com/mbostock/topojson/blob/master/examples/world-50m.json
 */
 d3sparql.coordmap = function(json,config) {
   var head = json.head.vars
   var data = json.results.bindings
 
   var opts = {
-    "var_lat":   config.var_lat  || "lat",
-    "var_lng":   config.var_lng  || "lng",
+    "var_lat":   config.var_lat  || head[0] || "lat",
+    "var_lng":   config.var_lng  || head[1] || "lng",
     "width":     config.width    || 960,
     "height":    config.height   || 480,
     "radius":    config.radius   || 5,
@@ -1835,25 +1847,27 @@ d3sparql.coordmap = function(json,config) {
         ]) + ")"
       });
   });
-
-  d3.select(self.frameElement).style("height", opts.height + "px");
 }
 
 /*
-  Map + values for each element in color
+  World Map colored by location names defined in a TopoJSON file
 
   Options:
     config = {
-      "width":  1000,           // canvas width
-      "height": 1000,           // canvas height
-      "color_max": "red",       // color for maximum value
-      "color_min": "white",     // color for minimum value
-      "color_scale": "linear"   // color scale (linear or log)
-      "topojson": "dir/to/japan.topojson",
-      "mapname": "japan",
-      "center_lat": 34,         // latitude
-      "center_lng": 137,        // longitude
-      "selector": "#result"
+      "label":       "name",    // SPARQL variable name for location names (optional; default is the 1st variable)
+      "value":       "size",    // SPARQL variable name for numerical values (optional; default is the 2nd variable)
+      "width":       1000,      // canvas width (optional)
+      "height":      1000,      // canvas height (optional)
+      "color_max":   "blue",    // color for maximum value (optional)
+      "color_min":   "white",   // color for minimum value (optional)
+      "color_scale": "linear"   // color scale (optional; "linear" or "log")
+      "topojson":    "path/to/japan.topojson",  // TopoJSON file
+      "mapname":     "japan",   // JSON key name of a map location root (e.g., "objects":{"japan":{"type":"GeometryCollection", ...)
+      "keyname":     "name",    // JSON key name of map locations matched with "label" (e.g., "properties":{"name":"Tokyo", ...)
+      "center_lat":  34,        // latitude for a map location center (optional; default is 34 for Japan)
+      "center_lng":  137,       // longitude for a map location center (optional; default is 137 for Japan)
+      "scale":       10000,     // scale of rendering (optional)
+      "selector":    "#result"
     }
 
   Synopsis:
@@ -1862,34 +1876,45 @@ d3sparql.coordmap = function(json,config) {
     function render(json) {
       d3sparql.namedmap(json, config = {})
     }
+
+  Dependencies:
+    * topojson.js
+      * Download from http://d3js.org/topojson.v1.min.js
+      * Put <script src="topojson.js"></script> in the HTML <head> section
+    * japan.topojson
+      * Download from https://github.com/sparql-book/sparql-book/blob/master/chapter5/D3/japan.topojson
 */
 d3sparql.namedmap = function(json, config) {
   var head = json.head.vars
   var data = json.results.bindings
 
   var opts = {
+    "label":        config.label       || head[0] || "label",
+    "value":        config.value       || head[1] || "value",
     "width":        config.width       || 1000,
     "height":       config.height      || 1000,
-    "color_max":    config.color_max   || "blue",
+    "color_max":    config.color_max   || "red",
     "color_min":    config.color_min   || "white",
     "color_scale":  config.color_scale || "log",
     "topojson":     config.topojson    || "japan.topojson",
     "mapname":      config.mapname     || "japan",
+    "keyname":      config.keyname     || "name_local",
     "center_lat":   config.center_lat  || 34,
     "center_lng":   config.center_lng  || 137,
     "scale":        config.scale       || 10000,
     "selector":     config.selector    || "#result"
   }
 
-  // uses ?size for numbers, ?label for geo names
   var size = d3.nest()
-        .key(function(d) {return d.label.value})
+        .key(function(d) { return d[opts.label].value })
         .rollup(function(d) {
           return d3.sum(d, function(d) {
-            return parseInt(d.size.value)
+            return parseInt(d[opts.value].value)
           })
         }).map(data, d3.map)
   var extent = d3.extent((d3.map(size).values()))
+
+  if (d3sparql.debug) { console.log(JSON.stringify(size)) }
 
   var svg = d3.select(opts.selector).html("").append("svg")
     .attr("width", opts.width)
@@ -1921,7 +1946,7 @@ d3sparql.namedmap = function(json, config) {
       .attr("stroke-width", 0.5)
       .style("fill", function(d, i) {
         // map SPARQL results to colors
-        return color(size[d.properties.name_local])
+        return color(size[d.properties[opts.keyname]])
       })
 
     svg.selectAll(".place-label")
@@ -1936,7 +1961,7 @@ d3sparql.namedmap = function(json, config) {
         return "translate(" + projection([lng, lat]) + ")"
       })
       .attr("dx", "-1.5em")
-      .text(function(d) { return d.properties.name_local; })
+      .text(function(d) { return d.properties[opts.keyname] })
   })
 }
 
@@ -1952,6 +1977,11 @@ d3sparql.toggle = function() {
     elem.style("display", "none")
     button.attr("class", "icon-chevron-down")
   }
+}
+
+/* for IFRAME embed */
+d3sparql.frameheight = function(height) {
+  d3.select(self.frameElement).style("height", height + "px")
 }
 
 /* for Node.js */

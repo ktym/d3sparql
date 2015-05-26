@@ -14,6 +14,8 @@
     }
     function render(json) {
       var config = {
+        "label":     "label",
+        "value":     "size",
         "topojson":  "lib/d3/map/japan.topojson",
         //"color_scale": "linear",
         "color_max": "red",
@@ -23,6 +25,7 @@
     }
 
     function exec_offline() {
+      d3sparql.debug = true
       d3.json("cache/dbpedia/japan.json", render)
     }
     function toggle() {

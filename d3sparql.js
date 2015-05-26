@@ -1382,7 +1382,7 @@ d3sparql.circlepack = function(json, config) {
 
   var pack = d3.layout.pack()
     .size([r, r])
-    .value(function(d) { return d.size })
+    .value(function(d) { return d.value })
 
   var node  = tree
   var nodes = pack.nodes(tree)

@@ -14,12 +14,16 @@
     }
     function render(json) {
       var config = {
-        "label":     "label",
-        "value":     "size",
-        "topojson":  "lib/d3/map/japan.topojson",
-        //"color_scale": "linear",
-        "color_max": "red",
-        "selector": "#result"
+        "label":      "label",
+        "value":      "size",
+        "color_max":  "red",
+        "topojson":   "lib/d3/map/japan.topojson",
+        "mapname":    "japan",
+        "keyname":    "name_local",
+        "center_lat": 34,
+        "center_lng": 137,
+        "scale":      10000,
+        "selector":   "#result"
       }
       d3sparql.namedmap(json, config)
     }

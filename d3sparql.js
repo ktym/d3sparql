@@ -1496,7 +1496,7 @@ d3sparql.treemap = function(json, config) {
   var treemap = d3.layout.treemap()
     .size([width, height])
     .sticky(true)
-    .value(function(d) {return d.size})
+    .value(function(d) {return d.value})
   var div = d3.select(opts.selector).html("").append("div")
     .style("position", "relative")
     .style("width", opts.width + "px")

@@ -3,7 +3,7 @@
 //
 //   Web site: http://github.com/ktym/d3sparql/
 //   Copyright: 2013-2015 (C) Toshiaki Katayama (ktym@dbcls.jp)
-//   License: Under the same license as D3.js's (BSD license)
+//   License: BSD license (same as D3.js)
 //   Initial version: 2013-01-28
 //
 

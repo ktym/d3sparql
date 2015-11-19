@@ -79,6 +79,10 @@ Semantic Web technologies are getting widely used in information sciences along 
 
 * http://www.slideshare.net/ToshiakiKatayama/d3sparqljs-demo-at-swat4ls-2014-in-berlin
 
+### License
+
+* The d3sparql.js library is distributed under the same license as D3.js's ([BSD license](http://opensource.org/licenses/BSD-3-Clause)).
+
 ### ChangeLog
 
 See details at https://github.com/ktym/d3sparql/commits/master/d3sparql.js

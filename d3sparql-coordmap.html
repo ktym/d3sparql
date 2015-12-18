@@ -62,19 +62,19 @@ PREFIX sio: <http://semanticscience.org/resource/>
 # Samples reporting latitude and longitude
 SELECT DISTINCT ?item ?lat ?lng
 WHERE {
-  ?item biosd-terms:has-bio-characteristic ?lat_value, ?lng_value .
+  ?item biosd-terms:has-sample-attribute ?lat_value, ?lng_value .
 
   ?lat_value
-    biosd-terms:has-bio-characteristic-type [ rdfs:label ?lat_label ] ;
+    dc:type ?lat_label;
     sio:SIO_000300 ?lat . # sio:has value
 
-  FILTER (regex(?lat_label, "latitude", "i")) .
+  FILTER ( LCASE ( STR ( ?lat_label ) ) = "latitude" ) .
 
   ?lng_value
-    biosd-terms:has-bio-characteristic-type [ rdfs:label ?lng_label ] ;
+    dc:type ?lng_label;
     sio:SIO_000300 ?lng . # sio:has value
 
-  FILTER (regex(?lng_label, "longitude", "i")) .
+  FILTER ( LCASE ( STR ( ?lng_label ) ) = "longitude" ) .
 } LIMIT 1000
       </textarea>
     </div>

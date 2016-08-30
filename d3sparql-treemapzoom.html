@@ -66,7 +66,7 @@ SELECT  (REPLACE(STR(?root), ".*/", "") AS ?root_label)
         (REPLACE(STR(?parent), ".*/", "") AS ?parent_label)
         (REPLACE(STR(?enzyme), ".*/", "") AS ?enzyme_label)
         (COUNT(?protein) AS ?value)
-FROM <http://togogenome.org/graph/uniprot/>
+FROM <http://togogenome.org/graph/uniprot>
 WHERE
 {
         VALUES ?root { ec:1.-.-.- }

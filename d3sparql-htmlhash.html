@@ -41,32 +41,24 @@
       <textarea id="sparql" class="span9" rows=15>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX obo: <http://purl.obolibrary.org/obo/>
-PREFIX faldo: <http://biohackathon.org/resource/faldo#>
-prefix insdc: <http://ddbj.nig.ac.jp/ontologies/sequence#>
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX dbp: <http://dbpedia.org/property/>
+PREFIX dbr: <http://dbpedia.org/resource/>
 
-SELECT DISTINCT ?description ?genename ?aaseq ?location ?begin ?end ?up
+SELECT ?language ?description ?developer ?paradigm ?version
 WHERE {
-  ?s insdc:locus_tag "slr1311" .
-  ?s insdc:product ?description .
-  ?s insdc:translation ?aaseq .
-  ?s insdc:gene ?genename .
-  ?s rdfs:seeAlso ?x .
-  ?x rdf:type <http://identifiers.org/ncbigene/> .
-  ?x rdfs:seeAlso ?up .
-  ?s faldo:location ?l .
-  ?l insdc:location ?location .
-  ?l faldo:begin ?b .
-  ?b faldo:position ?begin .
-  ?l faldo:end ?e .
-  ?e faldo:position ?end .
-  ?s obo:so_part_of+ ?seq .
-  ?seq rdf:type ?seqtype .
-  ?seq rdfs:seeAlso ?tax .
-  ?tax rdfs:label "taxon:1148" .
-  ?tax rdf:type <http://identifiers.org/taxonomy/> .
-  FILTER (?seqtype IN (obo:SO_0000988, obo:SO_0000155))
-} limit 1
+  VALUES ?language { "SPARQL"@en }
+  ?s rdf:type dbo:ProgrammingLanguage ;
+     rdfs:label ?language ;
+     rdfs:comment ?description ;
+     dbo:developer/rdfs:label ?developer ;
+     dbp:paradigm/rdfs:label ?paradigm ;
+     dbp:latestReleaseVersion ?version .
+  FILTER (lang(?description) = 'en')
+  FILTER (lang(?developer) = 'en')
+  FILTER (lang(?paradigm) = 'en')
+}
+LIMIT 1
       </textarea>
     </div>
     <div id="result"></div>

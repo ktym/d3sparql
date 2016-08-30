@@ -44,33 +44,35 @@ prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix up: <http://purl.uniprot.org/core/>
 prefix obo: <http://purl.obolibrary.org/obo/>
 prefix tax: <http://purl.uniprot.org/taxonomy/>
-prefix insdc: <http://ddbj.nig.ac.jp/ontologies/sequence#>
+prefix insdc: <http://ddbj.nig.ac.jp/ontologies/nucleotide/>
 
 select distinct ?length ?genes ?hks ?taxid ?label
 where {
   # Cyanobacteria (1117)
   ?taxid rdfs:subClassOf+ <http://identifiers.org/taxonomy/1117> .
-  ?taxid rdf:type <http://identifiers.org/taxonomy/> .
-  ?s rdfs:seeAlso ?taxid .
-  ?s rdfs:label ?label .
-  ?s rdf:type obo:SO_0000340 . # chromosome
-  ?s insdc:sequence_length ?length .
+  ?taxid rdf:type <http://identifiers.org/taxonomy> .
+  ?source rdfs:seeAlso ?taxid .
+  ?source obo:so_part_of ?seq .
+  ?entry insdc:sequence ?seq .
+  ?entry rdfs:label ?label .
+  ?seq rdfs:subClassOf obo:SO_0000340 . # chromosome
+  ?seq insdc:sequence_length ?length .
   {
-    select ?s (count(?gene) as ?genes)
+    select ?seq (count(?gene) as ?genes)
     where {
-      ?gene obo:so_part_of ?s .
-      ?gene rdf:type obo:SO_0000704 . # gene
+      ?gene obo:so_part_of ?seq .
+      ?gene rdfs:subClassOf obo:SO_0000704 . # gene
     }
-    group by ?s
+    group by ?seq
   }
   {
-    select ?s (count(?cds) as ?hks)
+    select ?seq (count(?cds) as ?hks)
     where {
       # Signal transduction histidine kinase (IPR005467)
       ?cds rdfs:seeAlso <http://identifiers.org/interpro/IPR005467> .
-      ?cds obo:so_part_of+ ?s .
+      ?cds obo:so_part_of+ ?seq .
     }
-    group by ?s
+    group by ?seq
   }
 } order by desc(?genes) limit 100
       </textarea>

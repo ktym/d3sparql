@@ -87,11 +87,9 @@ WHERE {
           dbpprop:year ?child_year .
   ?root   dbpedia-owl:influenced* ?child .
   ?parent dbpedia-owl:influenced ?child .
-  BIND (xsd:integer(?parent_year) AS ?pyear)
-  FILTER (?pyear > 1950 and ?pyear < 2020)
-  BIND (xsd:integer(?child_year) AS ?cyear)
-  FILTER (?cyear > 1950 and ?cyear < 2020)
-  FILTER (?pyear < ?cyear)
+  FILTER (?parent_year > 1950 and ?parent_year < 2020)
+  FILTER (?child_year > 1950 and ?child_year < 2020)
+  FILTER (?parent_year < ?child_year)
   FILTER (?root != ?child)
   FILTER (?parent != ?child)
   FILTER (LANG(?root_label) = 'en')

@@ -32,7 +32,7 @@
       <form class="form-inline">
         <label>SPARQL endpoint:</label>
         <div class="input-append">
-          <input id="endpoint" class="span5" value="http://togostanza.org/sparql" type="text">
+          <input id="endpoint" class="span5" value="http://dbpedia.org/sparql" type="text">
           <button class="btn" type="button" onclick="exec()">Query</button>
           <button class="btn" type="button" onclick="exec_offline()">Use cache</button>
           <button class="btn" type="button" onclick="toggle()"><i id="button" class="icon-chevron-up"></i></button>
@@ -53,7 +53,7 @@ WHERE {
      rdfs:comment ?description ;
      dbo:developer/rdfs:label ?developer ;
      dbp:paradigm/rdfs:label ?paradigm ;
-     dbp:latestReleaseVersion ?version .
+     dbo:latestReleaseVersion ?version .
   FILTER (lang(?description) = 'en')
   FILTER (lang(?developer) = 'en')
   FILTER (lang(?paradigm) = 'en')

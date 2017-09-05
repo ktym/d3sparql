@@ -57,12 +57,13 @@
         </div>
       </form>
       <textarea id="sparql" class="span9" rows=15>
-# This may take a while to get results
 PREFIX up: <http://purl.uniprot.org/core/>
 PREFIX ec: <http://purl.uniprot.org/enzyme/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-SELECT  (REPLACE(STR(?root), ".*/", "") AS ?root_label)
+PREFIX taxon:<http://purl.uniprot.org/taxonomy/>
+
+SELECT (REPLACE(STR(?root), ".*/", "") AS ?root_label)
         (REPLACE(STR(?parent), ".*/", "") AS ?parent_label)
         (REPLACE(STR(?enzyme), ".*/", "") AS ?enzyme_label)
         (COUNT(?protein) AS ?value)
@@ -70,9 +71,11 @@ FROM <http://togogenome.org/graph/uniprot>
 WHERE
 {
         VALUES ?root { ec:1.-.-.- }
+        ?root a up:Enzyme .
         ?root skos:narrowerTransitive* ?enzyme .
         ?parent skos:narrowerTransitive ?enzyme .
         ?protein up:enzyme ?enzyme .
+        ?protein up:organism taxon:9606
 }
 GROUP BY ?root ?parent ?enzyme ORDER BY ?enzyme
       </textarea>

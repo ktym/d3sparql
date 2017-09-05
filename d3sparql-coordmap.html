@@ -40,23 +40,15 @@
       <form class="form-inline">
         <label>SPARQL endpoint:</label>
         <div class="input-append">
-          <input id="endpoint" class="span5" value="http://www.ebi.ac.uk/rdf/services/biosamples/sparql" type="text">
+          <input id="endpoint" class="span5" value="http://www.ebi.ac.uk/rdf/services/sparql" type="text">
           <button class="btn" type="button" onclick="exec()">Query</button>
           <button class="btn" type="button" onclick="exec_offline()">Use cache</button>
           <button class="btn" type="button" onclick="toggle()"><i id="button" class="icon-chevron-up"></i></button>
         </div>
       </form>
       <textarea id="sparql" class="span9" rows=15>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
-PREFIX dcterms: <http://purl.org/dc/terms/>
-PREFIX obo: <http://purl.obolibrary.org/obo/>
-PREFIX efo: <http://www.ebi.ac.uk/efo/>
 PREFIX biosd-terms: <http://rdf.ebi.ac.uk/terms/biosd/>
-PREFIX pav: <http://purl.org/pav/2.0/>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX sio: <http://semanticscience.org/resource/>
 
 # Samples reporting latitude and longitude

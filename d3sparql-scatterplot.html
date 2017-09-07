@@ -51,42 +51,48 @@
         </div>
       </form>
       <textarea id="sparql" class="span9" rows=15>
-prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-prefix up: <http://purl.uniprot.org/core/>
-prefix obo: <http://purl.obolibrary.org/obo/>
-prefix tax: <http://purl.uniprot.org/taxonomy/>
-prefix insdc: <http://ddbj.nig.ac.jp/ontologies/nucleotide/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX id_tax:<http://identifiers.org/taxonomy/>
+PREFIX tax: <http://ddbj.nig.ac.jp/ontologies/taxonomy/>
+PREFIX stats:  <http://togogenome.org/stats/>
+PREFIX up_tax:<http://purl.uniprot.org/taxonomy/>
+PREFIX up: <http://purl.uniprot.org/core/>
+PREFIX ipr: <http://purl.uniprot.org/interpro/>
 
-select distinct ?length ?genes ?hks ?taxid ?label
-where {
-  # Cyanobacteria (1117)
-  ?taxid rdfs:subClassOf+ <http://identifiers.org/taxonomy/1117> .
-  ?taxid rdf:type <http://identifiers.org/taxonomy> .
-  ?source rdfs:seeAlso ?taxid .
-  ?source obo:so_part_of ?seq .
-  ?entry insdc:sequence ?seq .
-  ?entry rdfs:label ?label .
-  ?seq rdfs:subClassOf obo:SO_0000340 . # chromosome
-  ?seq insdc:sequence_length ?length .
+SELECT DISTINCT ?taxid (SAMPLE(?label) AS ?label) (MAX(?length) AS ?length)  (MAX(?genes) AS ?genes) (MAX(?hks) AS ?hks)
+{
   {
-    select ?seq (count(?gene) as ?genes)
-    where {
-      ?gene obo:so_part_of ?seq .
-      ?gene rdfs:subClassOf obo:SO_0000704 . # gene
+    SELECT DISTINCT
+     (REPLACE(STR(?organism),"http://identifiers.org/taxonomy/","") AS ?taxid)
+     ?organism ?label
+     ?length
+     ?genes
+    WHERE
+    {
+      ?organism a tax:Taxon ;
+        rdfs:subClassOf+ id_tax:1117 ;
+        stats:sequence_length ?length ;
+        stats:gene ?genes ;
+        tax:scientificName ?label .
     }
-    group by ?seq
   }
+  UNION
   {
-    select ?seq (count(?cds) as ?hks)
-    where {
+    SELECT DISTINCT
+     (REPLACE(STR(?organism),"http://purl.uniprot.org/taxonomy/","") AS ?taxid)
+     (COUNT(DISTINCT ?protein) AS ?hks)
+     ?label
+    WHERE
+    {
+      ?protein a up:Protein ;
+         up:organism ?organism .
+      ?organism rdfs:subClassOf up_tax:1117 ;
+        up:scientificName ?label .
       # Signal transduction histidine kinase (IPR005467)
-      ?cds rdfs:seeAlso <http://identifiers.org/interpro/IPR005467> .
-      ?cds obo:so_part_of+ ?seq .
-    }
-    group by ?seq
+      ?protein rdfs:seeAlso ipr:IPR005467 .
+    } GROUP BY ?organism ?label
   }
-} order by desc(?genes) limit 100
+} GROUP BY ?taxid HAVING (SAMPLE(?hks) > 1)
       </textarea>
     </div>
     <div id="result"></div>

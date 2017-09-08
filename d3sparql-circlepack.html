@@ -74,17 +74,18 @@
       </form>
       <textarea id="sparql" class="span9" rows=15>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX up: <http://purl.uniprot.org/core/>
-SELECT ?root_name ?parent_name ?child_name
-FROM <http://togogenome.org/graph/uniprot>
+PREFIX tax: <http://ddbj.nig.ac.jp/ontologies/taxonomy/>
+
+SELECT DISTINCT ?root_name ?parent_name ?child_name
+FROM <http://togogenome.org/graph/taxonomy>
 WHERE
 {
   VALUES ?root_name { "Tardigrada" }
-  ?root up:scientificName ?root_name .
+  ?root tax:scientificName ?root_name .
   ?child rdfs:subClassOf+ ?root .
   ?child rdfs:subClassOf ?parent .
-  ?child up:scientificName ?child_name .
-  ?parent up:scientificName ?parent_name .
+  ?child tax:scientificName ?child_name .
+  ?parent tax:scientificName ?parent_name .
 }
       </textarea>
     </div>

@@ -43,18 +43,13 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX id_tax:<http://identifiers.org/taxonomy/>
 PREFIX tax: <http://ddbj.nig.ac.jp/ontologies/taxonomy/>
 PREFIX stats:  <http://togogenome.org/stats/>
-PREFIX up_tax:<http://purl.uniprot.org/taxonomy/>
 PREFIX up: <http://purl.uniprot.org/core/>
 PREFIX ipr: <http://purl.uniprot.org/interpro/>
 
-SELECT DISTINCT ?taxid (SAMPLE(?label) AS ?label) (MAX(?length) AS ?length)  (MAX(?genes) AS ?genes) (MAX(?hks) AS ?hks)
+SELECT DISTINCT ?organism ?label ?length ?genes (COUNT(DISTINCT ?protein) AS ?hks)
 {
   {
-    SELECT DISTINCT
-     (REPLACE(STR(?organism),"http://identifiers.org/taxonomy/","") AS ?taxid)
-     ?organism ?label
-     ?length
-     ?genes
+    SELECT DISTINCT ?organism ?up_tax ?label ?length ?genes
     WHERE
     {
       ?organism a tax:Taxon ;
@@ -62,25 +57,15 @@ SELECT DISTINCT ?taxid (SAMPLE(?label) AS ?label) (MAX(?length) AS ?length)  (MA
         stats:sequence_length ?length ;
         stats:gene ?genes ;
         tax:scientificName ?label .
+        BIND (IRI(REPLACE(STR(?organism), "http://identifiers.org/taxonomy/", "http://purl.uniprot.org/taxonomy/")) AS ?up_tax)
     }
   }
-  UNION
-  {
-    SELECT DISTINCT
-     (REPLACE(STR(?organism),"http://purl.uniprot.org/taxonomy/","") AS ?taxid)
-     (COUNT(DISTINCT ?protein) AS ?hks)
-     ?label
-    WHERE
-    {
-      ?protein a up:Protein ;
-         up:organism ?organism .
-      ?organism rdfs:subClassOf up_tax:1117 ;
-        up:scientificName ?label .
-      # Signal transduction histidine kinase (IPR005467)
-      ?protein rdfs:seeAlso ipr:IPR005467 .
-    } GROUP BY ?organism ?label
-  }
-} GROUP BY ?taxid HAVING (SAMPLE(?hks) > 1)
+  ?up_tax a up:Taxon .
+  ?protein up:organism ?up_tax ;
+    a up:Protein .
+  # Signal transduction histidine kinase (IPR005467)
+  ?protein rdfs:seeAlso ipr:IPR005467 .
+} GROUP BY ?organism ?label ?length ?genes ORDER BY ?length
       </textarea>
     </div>
     <div id="result"></div>

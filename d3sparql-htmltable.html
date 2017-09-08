@@ -52,6 +52,7 @@ SELECT DISTINCT ?organism ?label ?length ?genes (COUNT(DISTINCT ?protein) AS ?hk
     SELECT DISTINCT ?organism ?up_tax ?label ?length ?genes
     WHERE
     {
+      # Cyanobacteria (1117)
       ?organism a tax:Taxon ;
         rdfs:subClassOf+ id_tax:1117 ;
         stats:sequence_length ?length ;

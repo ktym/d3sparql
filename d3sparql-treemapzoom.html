@@ -75,6 +75,7 @@ WHERE
         ?root skos:narrowerTransitive* ?enzyme .
         ?parent skos:narrowerTransitive ?enzyme .
         ?protein up:enzyme ?enzyme .
+        # Homo sapiens (9606)
         ?protein up:organism taxon:9606
 }
 GROUP BY ?root ?parent ?enzyme ORDER BY ?enzyme

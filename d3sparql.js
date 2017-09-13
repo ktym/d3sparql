@@ -8,7 +8,7 @@
 //
 
 var d3sparql = {
-  version: "d3sparql.js version 2015-11-19",
+  version: "d3sparql.js version 2017-09-04",
   debug: false  // set to true for showing debug information
 }
 
@@ -55,9 +55,7 @@ var d3sparql = {
      </body>
     </html>
 */
-d3sparql.query = function(endpoint, sparql, callback) {
-  var url = endpoint + "?query=" + encodeURIComponent(sparql)
-  if (d3sparql.debug) { console.log(endpoint) }
+d3sparql.fetch = function(url, callback) {
   if (d3sparql.debug) { console.log(url) }
   var mime = "application/sparql-results+json"
   d3.xhr(url, mime, function(request) {
@@ -66,6 +64,7 @@ d3sparql.query = function(endpoint, sparql, callback) {
     callback(JSON.parse(json))
   })
 /*
+  // d3.json sometimes fails to retrieve "application/sparql-results+json" as it is designed for "application/json"
   d3.json(url, function(error, json) {
     if (d3sparql.debug) { console.log(error) }
     if (d3sparql.debug) { console.log(json) }
@@ -73,6 +72,14 @@ d3sparql.query = function(endpoint, sparql, callback) {
   })
 */
 }
+
+d3sparql.query = function(endpoint, sparql, callback) {
+  var url = endpoint + "?query=" + encodeURIComponent(sparql)
+  if (d3sparql.debug) { console.log(endpoint) }
+  d3sparql.fetch(url, callback)
+}
+
+
 
 /*
   Convert sparql-results+json object into a JSON graph in the {"nodes": [], "links": []} form.

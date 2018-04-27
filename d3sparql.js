@@ -287,7 +287,7 @@ d3sparql.htmltable = function(json, config) {
   var cells = rows.selectAll("td")
     .data(function(row) {
       return head.map(function(col) {
-        return row[col].value
+        return row[col] ? row[col].value : ""
       })
     })
     .enter()

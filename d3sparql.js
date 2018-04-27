@@ -8,7 +8,7 @@
 //
 
 var d3sparql = {
-  version: "d3sparql.js version 2017-09-04",
+  version: "d3sparql.js version 2018-04-27",
   debug: false  // set to true for showing debug information
 }
 
@@ -348,7 +348,7 @@ d3sparql.htmlhash = function(json, config) {
   var row = tbody.selectAll("tr")
     .data(function() {
        return head.map(function(col) {
-         return {"head": col, "data": data[col].value}
+         return {"head": col, "data": data[col] ? data[col].value : ""}
        })
      })
     .enter()

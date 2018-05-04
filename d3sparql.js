@@ -8,7 +8,7 @@
 //
 
 var d3sparql = {
-  version: "d3sparql.js version 2018-04-27",
+  version: "d3sparql.js version 2018-05-04",
   debug: false  // set to true for showing debug information
 }
 
@@ -656,8 +656,9 @@ d3sparql.scatterplot = function(json, config) {
   var data = json.results.bindings
 
   var opts = {
-    "label_x":  config.label_x  || head[0],
-    "label_y":  config.label_y  || head[1],
+    "label_x":  config.label_x  || head[0] || "x",
+    "label_y":  config.label_y  || head[1] || "y",
+    "label_r":  config.label_r  || head[2] || "r",
     "var_x":    config.var_x    || head[0],
     "var_y":    config.var_y    || head[1],
     "var_r":    config.var_r    || head[2] || 5,
@@ -669,10 +670,9 @@ d3sparql.scatterplot = function(json, config) {
     "margin_y": config.margin_y || 40,
     "selector": config.selector || null
   }
-
   var extent_x = d3.extent(data, function(d) { return parseInt(d[opts.var_x].value) })
   var extent_y = d3.extent(data, function(d) { return parseInt(d[opts.var_y].value) })
-  var extent_r = d3.extent(data, function(d) { return parseInt(d[opts.var_r].value) })
+  var extent_r = d3.extent(data, function(d) { return parseInt(d[opts.var_r] ? d[opts.var_r].value : opts.var_r) })
   var scale_x = d3.scale.linear().range([opts.margin_x, opts.width - opts.margin_x]).domain(extent_x)
   var scale_y = d3.scale.linear().range([opts.height - opts.margin_y, opts.margin_y]).domain(extent_y)
   var scale_r = d3.scale.linear().range([opts.min_r, opts.max_r]).domain(extent_r)
@@ -689,7 +689,10 @@ d3sparql.scatterplot = function(json, config) {
     .attr("class", "node")
     .attr("cx", function(d) { return scale_x(d[opts.var_x].value) })
     .attr("cy", function(d) { return scale_y(d[opts.var_y].value) })
-    .attr("r",  function(d) { return scale_r(d[opts.var_r].value) })
+    .attr("r",  function(d) { return scale_r(d[opts.var_r] ? d[opts.var_r].value : opts.var_r) })
+    .attr("opacity", 0.5)
+    .append("title")
+    .text(function(d) { return d[opts.label_r] ? d[opts.label_r].value : opts.label_r })
   var ax = svg.append("g")
     .attr("class", "x axis")
     .attr("transform", "translate(0," + (opts.height - opts.margin_y) + ")")
@@ -720,13 +723,14 @@ d3sparql.scatterplot = function(json, config) {
     "stroke": "black",
     "fill": "none",
   })
+  // This doesn't work with .append("circle") with .append("title") for tooltip
   circle.attr({
     "stroke": "gray",
     "stroke-width": "1px",
     "fill": "lightblue",
     "opacity": 0.5,
   })
-  //svg.selectAll(".label")
+  //svg.selectAll(".label").attr({
   svg.selectAll("text").attr({
     "stroke": "none",
     "fill": "black",
